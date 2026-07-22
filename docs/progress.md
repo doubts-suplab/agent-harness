@@ -29,8 +29,12 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
 - [x] `pytest` conformance suite mapping 1:1 to spec §9 (`tests/test_conformance.py`) + contract + framework-free tests
 - [x] Runnable `examples/quickstart.py`
 
-## Increment 2 — Consumers 🔜 (planned)
+## Increment 2 — Consumers 🚧 (in progress)
 
-- [ ] apex-sdlc consumes the harness (replaces its hand-rolled `BaseAgent`); update apex docs/HTML
+- [x] **apex-sdlc consumes the harness.** apex's phase agents run on the harness instead of a hand-rolled
+  loop: `app/agents/` bridge (context mapping, structlog port adapters, `PhaseAgent` base,
+  `ComplianceOfficerAgent`, runtime wiring); `agent-harness` added as a backend dependency; 8 bridge tests
+  green on Python 3.11. apex docs/HTML synced (backend + master CLAUDE.md, README, project-manifest,
+  docs/index.html). Required lowering the harness `requires-python` to 3.11 (ADR-0002 amendment).
 - [ ] Java binding for aether-grid; update grid docs/HTML
 - [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
