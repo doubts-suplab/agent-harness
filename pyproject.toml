@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-harness"
+version = "0.1.0"
+description = "Generic, enterprise-grade agent runtime — reference implementation of the harness protocol."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "AGPL-3.0-or-later" }
+authors = [{ name = "doubts-suplab" }]
+keywords = ["agent", "runtime", "harness", "governance", "llm", "ai"]
+# The core (agent_harness.core, .ports, .orchestration) has NO runtime dependencies —
+# it is framework-free by design (spec §7, ADR-0005). Optional extras add adapters/tooling.
+dependencies = []
+
+[project.optional-dependencies]
+contract = ["jsonschema>=4.20"]   # only the contract loader needs this
+test = ["pytest>=8.0", "pytest-cov>=5.0", "jsonschema>=4.20"]
+
+[project.urls]
+Homepage = "https://github.com/doubts-suplab/agent-harness"
+Specification = "https://github.com/doubts-suplab/agent-harness/blob/main/docs/spec/harness-protocol.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["agent_harness"]
+branch = true

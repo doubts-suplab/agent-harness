@@ -45,16 +45,38 @@ It does **not** own prompts, business logic, memory content, or product UX.
 
 ## Status
 
-**Increment 0 — Specification.** This repo currently ships:
+**Increment 0 — Specification** and **Increment 1 — Python reference implementation** are in.
 
+Specification:
 - [`docs/spec/harness-protocol.md`](docs/spec/harness-protocol.md) — the normative, language-neutral protocol.
 - [`docs/spec/agent-contract.schema.json`](docs/spec/agent-contract.schema.json) — machine-readable Agent Contract schema.
-- [`docs/spec/examples/`](docs/spec/examples/) — a worked contract that validates against the schema.
 - [`docs/decisions/`](docs/decisions/) — ADR-0001..0008.
-- [`docs/progress.md`](docs/progress.md) — increment tracking.
 
-**No runtime code yet.** Increment 1 is the Python 3.12 reference implementation of the core (envelope, gate,
-registry, Supervisor+Workers orchestration, audit/observability ports) plus a conformance test suite.
+Reference implementation (`src/agent_harness/`, Python 3.12, framework-free core):
+- `core/` — envelope, authority/decision model, confidence gate, tool registry, harness.
+- `orchestration/` — Supervisor + Workers. `ports/` — LLM + governance Protocols. `adapters/` — in-memory + LLM stub.
+- `contract.py` — loads/validates Agent Contracts against the schema.
+- `tests/` — 37 tests, 94% coverage, mapping 1:1 to the spec §9 conformance checklist.
+
+## Install & run
+
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -e ".[test]"        # library + test deps
+
+pytest                          # 37 tests, ~94% coverage
+python examples/quickstart.py   # end-to-end demo
+```
+
+```python
+from agent_harness import AgentInput, Harness      # zero-config: in-memory adapters by default
+out = Harness().invoke(my_agent, AgentInput("tenant", "user", context={...}))
+# out.decision.auto_enforced was decided by the harness gate — never by the agent
+```
+
+The **core** (`core`, `ports`, `orchestration`) has no third-party dependencies. `contract` validation and
+the test suite pull `jsonschema`/`pytest` via extras. Next: Increment 2 — real consumers (apex-sdlc, a Java
+binding for aether-grid). See [`docs/progress.md`](docs/progress.md).
 
 ---
 
