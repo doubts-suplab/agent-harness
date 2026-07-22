@@ -7,7 +7,7 @@ name = "agent-harness"
 version = "0.1.0"
 description = "Generic, enterprise-grade agent runtime — reference implementation of the harness protocol."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 license = { text = "AGPL-3.0-or-later" }
 authors = [{ name = "doubts-suplab" }]
 keywords = ["agent", "runtime", "harness", "governance", "llm", "ai"]

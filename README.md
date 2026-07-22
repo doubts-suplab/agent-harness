@@ -52,7 +52,7 @@ Specification:
 - [`docs/spec/agent-contract.schema.json`](docs/spec/agent-contract.schema.json) — machine-readable Agent Contract schema.
 - [`docs/decisions/`](docs/decisions/) — ADR-0001..0008.
 
-Reference implementation (`src/agent_harness/`, Python 3.12, framework-free core):
+Reference implementation (`src/agent_harness/`, Python 3.11+, framework-free core):
 - `core/` — envelope, authority/decision model, confidence gate, tool registry, harness.
 - `orchestration/` — Supervisor + Workers. `ports/` — LLM + governance Protocols. `adapters/` — in-memory + LLM stub.
 - `contract.py` — loads/validates Agent Contracts against the schema.
@@ -61,7 +61,7 @@ Reference implementation (`src/agent_harness/`, Python 3.12, framework-free core
 ## Install & run
 
 ```bash
-python3.12 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate   # Python 3.11+
 pip install -e ".[test]"        # library + test deps
 
 pytest                          # 37 tests, ~94% coverage

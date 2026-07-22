@@ -8,6 +8,7 @@ dist/
 build/
 *.egg-info/
 .venv/
+.venv*/
 venv/
 
 # Node (docs tooling, if any)

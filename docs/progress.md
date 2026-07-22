@@ -17,7 +17,7 @@ Goal: decide the shape of the harness before writing runtime code.
 
 ## Increment 1 — Python reference implementation ✅ (in review)
 
-Python 3.12, framework-free core, `src/agent_harness/`. 37 tests green, 94% coverage.
+Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% coverage (runs on 3.11 and 3.12).
 
 - [x] Core: `AgentInput`/`AgentOutput` envelope, two-axis authority/decision model (`core/model.py`)
 - [x] Centralized non-disableable confidence gate + bypass counter (`core/gate.py`)
