@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/doubts-suplab/agent-harness/docs/spec/agent-contract.schema.json",
+  "title": "Agent Contract",
+  "description": "Machine-readable Agent Contract loaded and validated by a harness-conformant runtime at startup. Formalizes the AIEL agent-contract template (aether-iel/templates/agent-contract.md). See harness-protocol.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identity",
+    "purpose",
+    "authorityLevel",
+    "capabilities",
+    "confidenceGate",
+    "toolAccess",
+    "inputContract",
+    "outputContract",
+    "failureBehaviour",
+    "governance"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Contract schema version.",
+      "default": "1.0"
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agentName", "agentClass", "version"],
+      "properties": {
+        "agentName": {
+          "type": "string",
+          "description": "Stable unique name; MUST match AgentOutput.agentName.",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "agentClass": { "type": "string", "description": "Implementation class/type, e.g. GovernanceAgent." },
+        "capabilityEnum": { "type": "string", "description": "Coarse capability tag, e.g. GOVERNANCE." },
+        "ownerService": { "type": "string", "description": "Owning product/service; informational only, no runtime coupling." },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" }
+      }
+    },
+    "purpose": {
+      "type": "string",
+      "description": "One paragraph: what this agent does and why.",
+      "minLength": 1
+    },
+    "authorityLevel": {
+      "type": "string",
+      "description": "Static capability ceiling (harness-protocol.md §3.1). MUST NOT change at runtime.",
+      "enum": ["OBSERVE", "SUGGEST", "ALERT", "RATE_LIMIT", "BLOCK"]
+    },
+    "capabilities": {
+      "type": "array",
+      "description": "The DecisionActions this agent may emit (harness-protocol.md §3.2). Each MUST be within authorityLevel per the binding rule (§3.3).",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["ALLOW", "BLOCK", "ALERT", "SUGGEST", "DEFER"]
+      }
+    },
+    "confidenceGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["threshold", "escalationPath"],
+      "description": "Confidence gate config (harness-protocol.md §4). The gate itself lives in the runtime; this only records the threshold and escalation path.",
+      "properties": {
+        "threshold": {
+          "type": "number",
+          "minimum": 0.8,
+          "maximum": 1.0,
+          "description": "Auto-enforce threshold. MUST NOT be below 0.80 for any externally-effecting action (G-3)."
+        },
+        "escalationPath": {
+          "type": "string",
+          "description": "Named human-review destination when autoEnforced=false."
+        }
+      }
+    },
+    "toolAccess": {
+      "type": "array",
+      "description": "Explicit tool allowlist (harness-protocol.md §5). Default-deny; no wildcards. Supervisor agents MUST have an empty list (T-4).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tool", "permission"],
+        "properties": {
+          "tool": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$", "not": { "pattern": "[*]" } },
+          "permission": { "type": "string", "enum": ["Read", "Write", "Invoke"] },
+          "purpose": { "type": "string" },
+          "sideEffect": { "type": "string", "enum": ["none", "read", "write", "external"], "default": "read" }
+        }
+      }
+    },
+    "inputContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tenantScoped"],
+      "description": "AgentInput expectations (harness-protocol.md §2.1).",
+      "properties": {
+        "tenantScoped": {
+          "type": "boolean",
+          "const": true,
+          "description": "MUST be true: every invocation is scoped by tenantId + userId."
+        },
+        "requiredContextKeys": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Keys the agent requires in AgentInput.context; absence triggers the missing-context failure default (§8)."
+        }
+      }
+    },
+    "outputContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emitsDecision"],
+      "description": "AgentOutput guarantees (harness-protocol.md §2.2).",
+      "properties": {
+        "emitsDecision": { "type": "boolean", "const": true },
+        "rationaleAlwaysPresent": {
+          "type": "boolean",
+          "description": "If true, agent always supplies rationale; harness still REQUIRES it for BLOCK/ALERT."
+        }
+      }
+    },
+    "fastPathConditions": {
+      "type": "array",
+      "description": "Conditions under which the agent short-circuits without LLM inference (e.g. 'zero memories -> DEFER').",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["when", "action"],
+        "properties": {
+          "when": { "type": "string" },
+          "action": { "type": "string", "enum": ["ALLOW", "BLOCK", "ALERT", "SUGGEST", "DEFER"] },
+          "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+        }
+      }
+    },
+    "failureBehaviour": {
+      "type": "array",
+      "description": "Failure -> safe fallback mapping (harness-protocol.md §8). Silent contracts inherit the protocol default table.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["failure", "action", "confidence"],
+        "properties": {
+          "failure": { "type": "string" },
+          "action": { "type": "string", "enum": ["ALLOW", "BLOCK", "ALERT", "SUGGEST", "DEFER"] },
+          "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+          "autoEnforced": { "type": "boolean", "const": false, "description": "Failure fallbacks never auto-enforce." }
+        }
+      }
+    },
+    "testingRequirements": {
+      "type": "array",
+      "description": "Checklist of test scenarios that MUST exist for this agent (fast-path, LLM-path, LLM-failure, low-confidence, capability-declaration).",
+      "items": { "type": "string" }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signoff"],
+      "description": "Sign-off record (aether-iel governance §12).",
+      "properties": {
+        "signoff": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role"],
+            "properties": {
+              "role": { "type": "string", "enum": ["Agent Engineer", "Governance Officer"] },
+              "approvedBy": { "type": "string" },
+              "approvedAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

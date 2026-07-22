@@ -1,0 +1,83 @@
+# EEIK Project Manifest — agent-harness
+# Bootstrapped from eeik-bootstrap conventions.
+# Repo: doubts-suplab/agent-harness
+
+project:
+  name: agent-harness
+  description: >
+    Generic, enterprise-grade agent runtime — a language-neutral harness protocol
+    (typed decision envelope, centralized confidence gate, runtime-enforced tool
+    registry, pluggable LLM/memory/audit/human-review ports) with a Python
+    reference implementation. AIEL-conformant, brand-neutral, bootstrappable via EEIK.
+  owning_team: doubts-suplab
+  business_domain: generic
+  project_type: agent-platform
+
+technology:
+  # Increment 0 ships a language-neutral specification only.
+  # The reference implementation (Increment 1) targets Python 3.12.
+  spec:
+    format: markdown
+    schema: json-schema-draft-07
+  reference_implementation:
+    language: python
+    version: "3.12"
+    status: planned          # Increment 1 — not yet present
+  llm:
+    # The harness owns no LLM. LlmPort adopts the apex-sdlc provider-abstraction shape.
+    runtime: pluggable
+    port: LlmPort
+
+architecture:
+  style: hexagonal
+  design_patterns:
+    - hexagonal-architecture
+    - ports-and-adapters
+    - domain-driven-design
+    - policy-as-code
+    - supervisor-workers
+  api_style: library
+
+ai:
+  enabled: true
+  pattern: multi-agent
+  memory_pattern: pluggable
+  governance:
+    confidence_threshold: 0.8
+    human_in_the_loop: true
+    tool_registry: default-deny
+    kill_switch: true
+
+governance:
+  profile: enterprise
+  review_requirements:
+    - architecture-review
+    - ai-governance-review
+  compliance:
+    - GDPR
+  audit_log: true
+  policy_as_code: true
+
+observability:
+  logging: structured
+  tracing: opentelemetry
+  metrics: prometheus
+  required_counters:
+    - confidence_gate_bypass_total   # MUST remain 0
+
+delivery:
+  team_structure: solo
+  methodology: incremental
+  cicd_platform: github-actions
+  branch_strategy: feature-branches
+  commit_convention: conventional-commits
+
+bootstrap:
+  source: eeik-bootstrap
+  source_repo: doubts-suplab/eeik-bootstrap
+  bootstrapped_at: "2026-07-22"
+  capability_packs_activated:
+    - core
+    - ai-engineering
+    - governance
+    - agent-harness
