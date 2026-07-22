@@ -15,13 +15,19 @@ Goal: decide the shape of the harness before writing runtime code.
 - [x] Repo scaffold — `CLAUDE.md`, `README.md`, `docs/index.html`, `project-manifest.yaml`, `.claude/` seed
 - [x] EEIK integration — `agent-harness` capability pack added to `eeik-bootstrap` (cross-repo, ADR-0008)
 
-## Increment 1 — Python reference implementation 🔜 (planned)
+## Increment 1 — Python reference implementation ✅ (in review)
 
-- [ ] Core: `AgentInput`/`AgentOutput` envelope, confidence gate, tool registry
-- [ ] Orchestration: Supervisor + Workers (primary pattern) first
-- [ ] Ports + in-memory reference adapters (LLM stub, audit, human-review, observability)
-- [ ] `pytest` conformance suite mapping 1:1 to the spec §9 checklist
-- [ ] Contract loader that validates against `agent-contract.schema.json` at startup
+Python 3.12, framework-free core, `src/agent_harness/`. 37 tests green, 94% coverage.
+
+- [x] Core: `AgentInput`/`AgentOutput` envelope, two-axis authority/decision model (`core/model.py`)
+- [x] Centralized non-disableable confidence gate + bypass counter (`core/gate.py`)
+- [x] Default-deny tool registry, no wildcards, security events (`core/registry.py`)
+- [x] Harness orchestrator: scope check, kill switch, gate, registry, audit, observability, human review (`core/harness.py`)
+- [x] Orchestration: Supervisor + Workers (supervisor holds no tools) (`orchestration/supervisor.py`)
+- [x] Ports as Protocols (`ports/llm.py`, `ports/governance.py`) + in-memory reference adapters + LLM stub (`adapters/`)
+- [x] Contract loader validating against `agent-contract.schema.json` + semantic binding rule (`contract.py`)
+- [x] `pytest` conformance suite mapping 1:1 to spec §9 (`tests/test_conformance.py`) + contract + framework-free tests
+- [x] Runnable `examples/quickstart.py`
 
 ## Increment 2 — Consumers 🔜 (planned)
 

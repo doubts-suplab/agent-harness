@@ -19,10 +19,11 @@ not build. Products (e.g. apex-sdlc, aether-grid) **consume** it; it consumes no
 confidence gate, the runtime-enforced tool registry, the orchestration patterns, and the pluggable ports.
 It does **not** own prompts, business logic, memory content, or product UX.
 
-**Current status:** Increment 0 — Specification. This repo currently ships the normative
-[harness protocol spec](docs/spec/harness-protocol.md), the [agent-contract JSON Schema](docs/spec/agent-contract.schema.json),
-and the [decision records](docs/decisions/). No runtime code yet — Increment 1 is the Python reference
-implementation.
+**Current status:** Increment 0 (spec) + Increment 1 (Python reference implementation) complete. Ships the
+normative [harness protocol spec](docs/spec/harness-protocol.md), the
+[agent-contract JSON Schema](docs/spec/agent-contract.schema.json), the [decision records](docs/decisions/),
+and a Python 3.12 reference runtime in `src/agent_harness/` (37 tests, 94% coverage). Next: Increment 2 —
+real consumers. Tests run on Python 3.12 (`python3.12 -m venv .venv && pip install -e ".[test]" && pytest`).
 
 > **Bootstrapped from EEIK.** This repo follows the `eeik-bootstrap` conventions (CLAUDE.md, `.claude/`,
 > `project-manifest.yaml` provenance). It is activatable in downstream projects via the

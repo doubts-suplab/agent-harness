@@ -56,7 +56,7 @@
 <body>
 <div class="wrap">
   <header>
-    <span class="tag">Increment 0 · Specification</span>
+    <span class="tag">Increment 1 · Reference Implementation</span>
     <h1>agent-harness</h1>
     <p class="lead">A generic, enterprise-grade agent runtime — the safe, governed, observable layer between
       an agent's decision logic and the outside world. Language-neutral protocol, brand-neutral home.</p>
@@ -106,11 +106,14 @@
   </ol>
 
   <h2>Status</h2>
-  <p>Increment 0 ships the normative <a href="spec/harness-protocol.md">protocol spec</a>, the
+  <p>Increment 0 shipped the normative <a href="spec/harness-protocol.md">protocol spec</a>, the
   <a href="spec/agent-contract.schema.json">Agent Contract schema</a>, a
   <a href="spec/examples/governance-agent.contract.json">worked example</a>, and
-  <a href="decisions/">ADR-0001..0008</a>. No runtime code yet — Increment 1 is the Python reference
-  implementation. See <a href="progress.md">progress.md</a>.</p>
+  <a href="decisions/">ADR-0001..0008</a>. Increment 1 adds the Python 3.12 reference runtime in
+  <code>src/agent_harness/</code> — a framework-free core (envelope, gate, registry, harness),
+  Supervisor+Workers orchestration, port Protocols with in-memory adapters, and a contract loader —
+  with 37 tests at 94% coverage mapping 1:1 to the spec §9 conformance checklist. Next: Increment 2,
+  real consumers. See <a href="progress.md">progress.md</a>.</p>
 
   <div class="note">This page mirrors <code>README.md</code>; they are kept in sync per the Documentation Sync Rule.</div>
 
