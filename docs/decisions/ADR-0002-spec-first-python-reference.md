@@ -14,8 +14,12 @@ Phase 6 standards are written around a specific Java/Spring/pgvector stack, but 
 
 Define the harness as a **language-neutral protocol specification** first
 ([`harness-protocol.md`](../spec/harness-protocol.md) + [`agent-contract.schema.json`](../spec/agent-contract.schema.json)).
-The first **reference implementation** targets **Python 3.12** (Increment 1). Other bindings (a Java binding
-for aether-grid) follow the same protocol.
+The first **reference implementation** targets **Python 3.11+** (Increment 1; developed on 3.12, floor set to
+3.11). Other bindings (a Java binding for aether-grid) follow the same protocol.
+
+> **Amendment (Increment 2):** the `requires-python` floor was lowered from 3.12 to **3.11** so the first
+> real consumer, apex-sdlc (Python 3.11), can depend on the harness. The core uses no 3.12-only syntax and
+> the full suite passes on both 3.11 and 3.12.
 
 ## Rationale
 
