@@ -1,0 +1,22 @@
+# Build artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+build/
+*.egg-info/
+.venv/
+venv/
+
+# Node (docs tooling, if any)
+node_modules/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Env
+.env
+.env.*
+!.env.example
