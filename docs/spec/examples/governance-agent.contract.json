@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "identity": {
+    "agentName": "governance-agent",
+    "agentClass": "GovernanceAgent",
+    "capabilityEnum": "GOVERNANCE",
+    "ownerService": "example-consumer",
+    "version": "1.0.0"
+  },
+  "purpose": "Evaluates a proposed action against policy and returns an enforcement decision. Worked example distilled from the AIEL agent-contract template (aether-iel/templates/agent-contract.md), used to validate agent-contract.schema.json.",
+  "authorityLevel": "BLOCK",
+  "capabilities": ["ALLOW", "BLOCK", "ALERT", "SUGGEST", "DEFER"],
+  "confidenceGate": {
+    "threshold": 0.95,
+    "escalationPath": "governance-human-review-queue"
+  },
+  "toolAccess": [
+    { "tool": "PolicyStore", "permission": "Read", "purpose": "Resolve applicable policy rules", "sideEffect": "read" },
+    { "tool": "LlmClient", "permission": "Invoke", "purpose": "Reason over the proposed action", "sideEffect": "external" }
+  ],
+  "inputContract": {
+    "tenantScoped": true,
+    "requiredContextKeys": ["proposedAction", "actionType"]
+  },
+  "outputContract": {
+    "emitsDecision": true,
+    "rationaleAlwaysPresent": true
+  },
+  "fastPathConditions": [
+    { "when": "No policy rules match the action type", "action": "DEFER", "confidence": 0.6 }
+  ],
+  "failureBehaviour": [
+    { "failure": "LLM unavailable", "action": "ALLOW", "confidence": 0.5, "autoEnforced": false },
+    { "failure": "Policy store timeout", "action": "DEFER", "confidence": 0.6, "autoEnforced": false }
+  ],
+  "testingRequirements": [
+    "fast-path: no matching policy -> DEFER",
+    "LLM-path: high-confidence BLOCK auto-enforces",
+    "LLM-failure: falls back to ALLOW, autoEnforced=false",
+    "low-confidence: BLOCK below 0.95 routes to human review",
+    "capability-declaration: emits only declared DecisionActions"
+  ],
+  "governance": {
+    "signoff": [
+      { "role": "Agent Engineer" },
+      { "role": "Governance Officer" }
+    ]
+  }
+}
