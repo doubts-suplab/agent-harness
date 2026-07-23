@@ -1,0 +1,32 @@
+name: Publish Java binding
+
+# Publishes com.agentharness:agent-harness-java to GitHub Packages on a GitHub Release
+# (or manual dispatch). Consumers resolve it from
+# https://maven.pkg.github.com/doubts-suplab/agent-harness.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          server-id: github
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_TOKEN
+      - name: Deploy to GitHub Packages
+        run: mvn -B -ntp deploy -DskipTests
+        working-directory: java
+        env:
+          MAVEN_USERNAME: ${{ github.actor }}
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
