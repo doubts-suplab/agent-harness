@@ -31,11 +31,18 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
 
 ## Increment 2 — Consumers 🚧 (in progress)
 
-- [x] **apex-sdlc consumes the harness.** apex's phase agents run on the harness instead of a hand-rolled
-  loop: `app/agents/` bridge (context mapping, structlog port adapters, `PhaseAgent` base,
-  `ComplianceOfficerAgent`, runtime wiring); `agent-harness` added as a backend dependency; 8 bridge tests
-  green on Python 3.11. apex docs/HTML synced (backend + master CLAUDE.md, README, project-manifest,
-  docs/index.html). Required lowering the harness `requires-python` to 3.11 (ADR-0002 amendment).
+- [x] **apex-sdlc consumes the harness — now all seven phase agents.** apex's phase agents run on the harness
+  instead of a hand-rolled loop: `app/agents/` bridge (context mapping, structlog port adapters, `PhaseAgent`
+  base, runtime wiring). The full SDLC is implemented on the harness — `RequirementsAgent`,
+  `ArchitectureAgent`, `PRReviewerAgent`, `QAAnalystAgent`, `ReleaseEngineerAgent`, `TechWriterAgent`, and
+  `ComplianceOfficerAgent` — plus a phase catalog (single source of truth), an in-memory `orchestrator` that
+  walks a project through every phase on one harness, and a deterministic stub LLM provider so the whole
+  journey runs offline (no DB/keys). A [reference journey](https://github.com/doubts-suplab/apex-sdlc/blob/main/examples/reference-project/README.md)
+  demonstrates one project through all 7 phases producing 17 governed artifacts, with the harness (not the
+  agents) deciding enforcement and `confidence_gate_bypass_total == 0`. `agent-harness` is a backend
+  dependency; **20 bridge/agent/journey tests green** on Python 3.11 (`pytest --noconftest tests/agents/`).
+  apex docs/HTML synced (backend + master CLAUDE.md, README, ROADMAP, `docs/personas.md`, reference-journey
+  page). Required lowering the harness `requires-python` to 3.11 (ADR-0002 amendment).
 - [x] **Java binding.** `java/` Maven module (`com.agentharness:agent-harness-java`, plain Java 21,
   framework-free) — the Java counterpart to the Python reference: envelope, centralized confidence gate,
   default-deny tool registry, Supervisor+Workers, ports + in-memory adapters, and an
