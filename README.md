@@ -2,7 +2,7 @@
 
 > **Generic, enterprise-grade agent runtime.** A language-neutral harness protocol — typed decision
 > envelope, centralized confidence gate, runtime-enforced tool registry, composable orchestration, and
-> pluggable ports — with a Python reference implementation to come.
+> pluggable ports — with Python and Java reference implementations.
 
 `agent-harness` is the runtime that stands between an agent's decision logic and the outside world. Its job
 is to make agent execution **safe, governed, observable, and reproducible** — regardless of which LLM, memory
@@ -45,18 +45,23 @@ It does **not** own prompts, business logic, memory content, or product UX.
 
 ## Status
 
-**Increment 0 — Specification** and **Increment 1 — Python reference implementation** are in.
+**Increment 0 — Specification**, **Increment 1 — Python reference**, and **Increment 2 — Java binding +
+apex-sdlc consumer** are in.
 
 Specification:
 - [`docs/spec/harness-protocol.md`](docs/spec/harness-protocol.md) — the normative, language-neutral protocol.
 - [`docs/spec/agent-contract.schema.json`](docs/spec/agent-contract.schema.json) — machine-readable Agent Contract schema.
-- [`docs/decisions/`](docs/decisions/) — ADR-0001..0008.
+- [`docs/decisions/`](docs/decisions/) — ADR-0001..0009.
 
-Reference implementation (`src/agent_harness/`, Python 3.11+, framework-free core):
+Reference implementation — **Python** (`src/agent_harness/`, 3.11+, framework-free core):
 - `core/` — envelope, authority/decision model, confidence gate, tool registry, harness.
 - `orchestration/` — Supervisor + Workers. `ports/` — LLM + governance Protocols. `adapters/` — in-memory + LLM stub.
 - `contract.py` — loads/validates Agent Contracts against the schema.
 - `tests/` — 37 tests, 94% coverage, mapping 1:1 to the spec §9 conformance checklist.
+
+**Java** binding (`java/`, `com.agentharness:agent-harness-java`, plain Java 21, framework-free) — the
+Java counterpart with the same protocol and §9 checklist, plus an `interop.LegacyAgentAdapter` for the
+aether-grid migration. 22 JUnit tests (`cd java && mvn test`). See [ADR-0009](docs/decisions/ADR-0009-java-binding.md).
 
 ## Install & run
 
@@ -75,8 +80,8 @@ out = Harness().invoke(my_agent, AgentInput("tenant", "user", context={...}))
 ```
 
 The **core** (`core`, `ports`, `orchestration`) has no third-party dependencies. `contract` validation and
-the test suite pull `jsonschema`/`pytest` via extras. Next: Increment 2 — real consumers (apex-sdlc, a Java
-binding for aether-grid). See [`docs/progress.md`](docs/progress.md).
+the test suite pull `jsonschema`/`pytest` via extras. Next: aether-grid consumes the Java binding (centralize
+its duplicated confidence gate). See [`docs/progress.md`](docs/progress.md).
 
 ---
 
