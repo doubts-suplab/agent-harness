@@ -6,12 +6,13 @@
 
 ## What This Project Is
 
-**agent-harness** (`doubts-suplab/agent-harness`) is a **generic, enterprise-grade agent runtime** — the
-layer that sits between an agent's decision logic and the outside world and makes agent execution **safe,
-governed, observable, and reproducible**.
+**HALO** — *Harness for Agent Lifecycle & Oversight* — is a **generic, enterprise-grade agent runtime**
+(`doubts-suplab/agent-harness`): the layer that sits between an agent's decision logic and the outside world
+and makes agent execution **safe, governed, observable, and reproducible**. HALO is the product identity; the
+repo and coordinates stay `agent-harness` / `com.agentharness` / `agent_harness` (ADR-0010).
 
-It is deliberately **brand-neutral**: it depends on no product, imports no product internals, and is not
-owned by any single application. It is a generic implementation of the "agent runtime" that the
+It is deliberately **vendor-neutral**: it depends on no product, imports no product internals, and is not
+owned by any single application — a first-class peer of APEX, EEIK, and Aether. It is a generic implementation of the "agent runtime" that the
 [Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/suplab/aether-iel) specifies but does
 not build. Products (e.g. apex-sdlc, aether-grid) **consume** it; it consumes nothing from them.
 

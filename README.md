@@ -1,17 +1,29 @@
-# agent-harness
+# HALO — agent-harness
 
-> **Generic, enterprise-grade agent runtime.** A language-neutral harness protocol — typed decision
-> envelope, centralized confidence gate, runtime-enforced tool registry, composable orchestration, and
-> pluggable ports — with Python and Java reference implementations.
+> **HALO · Harness for Agent Lifecycle & Oversight.** A generic, enterprise-grade agent runtime — a
+> language-neutral harness protocol (typed decision envelope, centralized confidence gate, runtime-enforced
+> tool registry, composable orchestration, pluggable ports) with Python and Java reference implementations.
+> The repo and coordinates stay `agent-harness` / `com.agentharness`; **HALO** is its product identity.
 
-`agent-harness` is the runtime that stands between an agent's decision logic and the outside world. Its job
-is to make agent execution **safe, governed, observable, and reproducible** — regardless of which LLM, memory
-store, or tools an agent uses, and regardless of host language or framework.
+**HALO** is the runtime that stands between an agent's decision logic and the outside world — a *halo* of
+oversight (gate, audit, human review, kill switch) around every agent decision. Its job is to make agent
+execution **safe, governed, observable, and reproducible** — regardless of which LLM, memory store, or tools
+an agent uses, and regardless of host language or framework.
 
-It is **brand-neutral**: it depends on no product and imports no product internals. It is a generic
+HALO is **vendor-neutral**: it depends on no product and imports no product internals. It is a generic
 implementation of the "agent runtime" that the
 [Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/suplab/aether-iel) specifies but does
-not build. Products **consume** it; it consumes nothing from them.
+not build. It is a first-class peer of the ecosystem's other platforms — **APEX** (SDLC), **EEIK** (bootstrap
+kit), and **Aether** (cognitive fabric) — and they **consume** it; it consumes nothing from them.
+
+> **Ecosystem**
+>
+> | Platform | Repo | Role |
+> |---|---|---|
+> | **APEX** | [`apex-sdlc`](https://github.com/doubts-suplab/apex-sdlc) | AI-powered SDLC — runs its phase agents on HALO |
+> | **EEIK** | [`eeik-bootstrap`](https://github.com/doubts-suplab/eeik-bootstrap) | Bootstrap kit — activates HALO via the `agent-harness` capability pack |
+> | **HALO** | `agent-harness` ← **you are here** | Generic agent runtime — the governed execution layer |
+> | **Aether** | [`aether-grid`](https://github.com/doubts-suplab/aether-grid) · [`aether-iel`](https://github.com/doubts-suplab/aether-iel) | Cognitive fabric — Grid's agent mesh runs on HALO; AIEL specifies the contract |
 
 ---
 

@@ -22,6 +22,17 @@
     <junit.version>5.10.2</junit.version>
   </properties>
 
+  <!-- Published to GitHub Packages by .github/workflows/publish-java.yml on a GitHub Release.
+       Consumers (e.g. aether-grid) resolve com.agentharness:agent-harness-java from this repository
+       (requires a token with read:packages in their Maven settings). -->
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/doubts-suplab/agent-harness</url>
+    </repository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
