@@ -52,11 +52,15 @@ Specification:
 - [`docs/spec/agent-contract.schema.json`](docs/spec/agent-contract.schema.json) — machine-readable Agent Contract schema.
 - [`docs/decisions/`](docs/decisions/) — ADR-0001..0008.
 
-Reference implementation (`src/agent_harness/`, Python 3.11+, framework-free core):
+Reference implementation — **Python** (`src/agent_harness/`, 3.11+, framework-free core):
 - `core/` — envelope, authority/decision model, confidence gate, tool registry, harness.
 - `orchestration/` — Supervisor + Workers. `ports/` — LLM + governance Protocols. `adapters/` — in-memory + LLM stub.
 - `contract.py` — loads/validates Agent Contracts against the schema.
 - `tests/` — 37 tests, 94% coverage, mapping 1:1 to the spec §9 conformance checklist.
+
+**Java** binding (`java/`, `com.agentharness:agent-harness-java`, plain Java 21, framework-free) — the
+Java counterpart with the same protocol and §9 checklist, plus an `interop.LegacyAgentAdapter` for the
+aether-grid migration. 21 JUnit tests (`cd java && mvn test`). See [ADR-0009](docs/decisions/ADR-0009-java-binding.md).
 
 ## Install & run
 

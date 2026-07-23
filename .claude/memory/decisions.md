@@ -2,6 +2,7 @@
 
 Full ADRs live in `docs/decisions/`. Summaries, newest first.
 
+- **ADR-0009** — Java binding lives in the harness repo (`java/`, `com.agentharness`, plain Java 21); aether-grid migrates onto it.
 - **ADR-0008** — Harness activated via an EEIK `agent-harness` capability pack (cross-repo into eeik-bootstrap).
 - **ADR-0007** — Four orchestration patterns; supervisor-holds-no-tools invariant.
 - **ADR-0006** — Reconcile authority ladder (`OBSERVE…BLOCK`) vs decision action (`ALLOW…DEFER`) on two axes.

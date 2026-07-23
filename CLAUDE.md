@@ -48,7 +48,7 @@ progress:** apex-sdlc consumes the harness (first real consumer). Tests run on P
 | Layer | Technology |
 |---|---|
 | Protocol | Language-neutral specification (Markdown + JSON Schema draft-07) |
-| Reference implementation | Python 3.12 (Increment 1 — not yet present) |
+| Reference implementation | Python 3.11+ (`src/agent_harness/`) and a Java 21 binding (`java/`, `com.agentharness`) |
 | LLM port shape | Adopted from the apex-sdlc provider abstraction (`Message`/`ToolDefinition`/`ToolCall`/`CompletionResult`) |
 | Docs | Markdown + a single-page `docs/index.html` mirroring the README |
 | License | AGPL-3.0 |

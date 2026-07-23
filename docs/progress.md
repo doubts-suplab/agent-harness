@@ -36,5 +36,12 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
   `ComplianceOfficerAgent`, runtime wiring); `agent-harness` added as a backend dependency; 8 bridge tests
   green on Python 3.11. apex docs/HTML synced (backend + master CLAUDE.md, README, project-manifest,
   docs/index.html). Required lowering the harness `requires-python` to 3.11 (ADR-0002 amendment).
-- [ ] Java binding for aether-grid; update grid docs/HTML
+- [x] **Java binding.** `java/` Maven module (`com.agentharness:agent-harness-java`, plain Java 21,
+  framework-free) — the Java counterpart to the Python reference: envelope, centralized confidence gate,
+  default-deny tool registry, Supervisor+Workers, ports + in-memory adapters, and an
+  `interop.LegacyAgentAdapter` for grid. **21 JUnit tests green** (19 conformance + 2 interop) via `mvn test`.
+  See [ADR-0009](decisions/ADR-0009-java-binding.md).
+- [ ] aether-grid **consumes** the Java binding: route agents through `Harness`, delete the 3 duplicated
+  `0.8` gate checks (`GovernanceAgent`, `TemporalPredictionAgent`, `AgentOutput`), add tool permissions;
+  update grid docs/HTML.
 - [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
