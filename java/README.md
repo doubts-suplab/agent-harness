@@ -8,7 +8,7 @@ Python reference implementation. Plain **Java 21**, framework-free (no Spring), 
 
 ```bash
 cd java
-mvn test        # 21 tests: 19 conformance (ConformanceTest) + 2 interop (LegacyAgentAdapterTest)
+mvn test        # 22 tests: 19 conformance + 2 interop + 1 stub adapter
 ```
 
 ## Shape

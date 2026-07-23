@@ -33,7 +33,7 @@ consumes the Python package.
 
 ## Consequences
 
-- The harness repo now builds two ways: `pip install -e .` (Python) and `mvn test` in `java/` (Java, 21 tests).
+- The harness repo now builds two ways: `pip install -e .` (Python) and `mvn test` in `java/` (Java, 22 tests).
 - Grid's actual refactor (depend on the artifact, centralize the gate, add tool permissions) is a scoped
   follow-up touching a production module with JaCoCo/checkstyle gates — tracked in `docs/progress.md`.
 - Where a published Maven artifact is needed, `mvn install` publishes `agent-harness-java` to the local repo
