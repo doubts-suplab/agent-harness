@@ -48,7 +48,9 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
   default-deny tool registry, Supervisor+Workers, ports + in-memory adapters, and an
   `interop.LegacyAgentAdapter` for grid. **22 JUnit tests green** (19 conformance + 2 interop + 1 stub) via `mvn test`.
   See [ADR-0009](decisions/ADR-0009-java-binding.md).
-- [ ] aether-grid **consumes** the Java binding: route agents through `Harness`, delete the 3 duplicated
-  `0.8` gate checks (`GovernanceAgent`, `TemporalPredictionAgent`, `AgentOutput`), add tool permissions;
-  update grid docs/HTML.
+- [x] **aether-grid consumes the Java binding.** `aether-agents` depends on `com.agentharness:agent-harness-java`;
+  the confidence gate is centralized in `HarnessConfidenceGate` (delegating to the harness `ConfidenceGate`),
+  deleting the 3 duplicated `0.8` checks (`AgentOutput`, `GovernanceAgent`, `TemporalPredictionAgent`).
+  `GovernanceAgent` routes through `Harness.invoke`; BLOCK now auto-enforces at ≥ 0.95. 39 aether-agents tests
+  green. Grid docs synced. (Remaining 6 agents migrate incrementally; tool registry is net-new for grid.)
 - [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
