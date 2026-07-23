@@ -46,7 +46,10 @@ It does **not** own prompts, business logic, memory content, or product UX.
 ## Status
 
 **Increment 0 — Specification**, **Increment 1 — Python reference**, and **Increment 2 — Java binding +
-apex-sdlc consumer** are in.
+apex-sdlc consumer** are in. apex-sdlc is the first real consumer and now runs **all seven of its SDLC
+phase agents** on the harness (Requirements, Architecture, Development, Testing, CI/CD, Docs, Governance);
+its [reference journey](https://github.com/doubts-suplab/apex-sdlc/blob/main/examples/reference-project/README.md)
+walks one project through every phase offline, with the harness — not the agents — deciding enforcement.
 
 Specification:
 - [`docs/spec/harness-protocol.md`](docs/spec/harness-protocol.md) — the normative, language-neutral protocol.
