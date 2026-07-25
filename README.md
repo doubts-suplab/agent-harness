@@ -21,7 +21,7 @@ kit), and **Aether** (cognitive fabric) — and they **consume** it; it consumes
 > | Platform | Repo | Role |
 > |---|---|---|
 > | **APEX** | [`apex-sdlc`](https://github.com/doubts-suplab/apex-sdlc) | AI-powered SDLC — runs its phase agents on HALO |
-> | **EEIK** | [`eeik-bootstrap`](https://github.com/doubts-suplab/eeik-bootstrap) | Bootstrap kit — activates HALO via the `agent-harness` capability pack |
+> | **EEIK** | [`eeik-bootstrap`](https://github.com/doubts-suplab/eeik-bootstrap) | Bootstrap kit — activates HALO via the `agent-harness` capability pack, and (v1.4) runs its own generators *on* HALO (governed generation) |
 > | **HALO** | `agent-harness` ← **you are here** | Generic agent runtime — the governed execution layer |
 > | **Aether** | [`aether-grid`](https://github.com/doubts-suplab/aether-grid) · [`aether-iel`](https://github.com/doubts-suplab/aether-iel) | Cognitive fabric — Grid's agent mesh runs on HALO; AIEL specifies the contract |
 
