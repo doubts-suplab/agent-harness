@@ -53,4 +53,8 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
   deleting the 3 duplicated `0.8` checks (`AgentOutput`, `GovernanceAgent`, `TemporalPredictionAgent`).
   `GovernanceAgent` routes through `Harness.invoke`; BLOCK now auto-enforces at ≥ 0.95. 39 aether-agents tests
   green. Grid docs synced. (Remaining 6 agents migrate incrementally; tool registry is net-new for grid.)
+- [x] **eeik-bootstrap consumes the Python runtime (v1.4).** EEIK's generators run on the harness via
+  `scripts/generation_harness.py` — a fourth consumer. Generation is modelled as a `SUGGEST`-authority
+  agent, so the gate (G-5) guarantees it never auto-enforces: drafts are audited and routed to human
+  review, and it fails safe when the harness is absent. See eeik `ADR-003`; `eeik demo` runs it offline.
 - [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
