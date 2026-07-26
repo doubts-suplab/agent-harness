@@ -59,6 +59,7 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
   review, and it fails safe when the harness is absent. See eeik `ADR-003`; `eeik demo` runs it offline.
 - [x] **eeik generates Agent Contracts against this spec.** `eeik contract` emits
   `agent-contract.schema.json`-conformant contracts from its blueprints and validates them via this repo's
-  own `agent_harness.contract.validate_contract` (schema + §3.3 binding rule). Closes the chain: AIEL
-  specifies → EEIK generates a contract-conformant agent → HALO runs it. See eeik `ADR-009`.
+  own `agent_harness.contract.validate_contract` (schema + §3.3 binding rule). Closes the chain: EEIK
+  generates against this repo's Agent Contract schema → HALO runs it. (This schema formalizes the AIEL
+  template; AIEL is upstream of HALO, with no dependency on EEIK.) See eeik `ADR-009`.
 - [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
