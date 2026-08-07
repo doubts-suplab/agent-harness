@@ -1,6 +1,14 @@
 # Progress
 
-Tracks increment-by-increment delivery. Newest first.
+Tracks increment-by-increment delivery. Newest first. For what's **planned next** (Increments 3–7,
+with feasibility and priority), see [`roadmap.md`](roadmap.md).
+
+> **Where things stand:** Increments 0–1 complete; Increment 2 (consumers) nearly complete with one
+> open item below. A structured review produced a prioritized plan now tracked in the roadmap:
+> (P1) finish orchestration patterns + side-effect gating, (P2) real adapters + observability,
+> (P3) packaging + examples + standalone docs, (P4) concurrency/failure tests + finish consumer
+> migrations, (P5) cross-language binding + a formal conformance suite. Nothing in Increments 3–7 has
+> started yet.
 
 ## Increment 0 — Specification ✅ (in review)
 
@@ -54,3 +62,31 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
   `GovernanceAgent` routes through `Harness.invoke`; BLOCK now auto-enforces at ≥ 0.95. 39 aether-agents tests
   green. Grid docs synced. (Remaining 6 agents migrate incrementally; tool registry is net-new for grid.)
 - [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
+  — carried into [roadmap Increment 6](roadmap.md#increment-6--test-hardening--consumer-migration-p4)
+  alongside finishing the remaining aether-grid agent migrations.
+
+---
+
+## Planned next — Increments 3–7
+
+Not started. Tracked with feasibility + priority in [`roadmap.md`](roadmap.md):
+
+- **Increment 3 (P1) — Protocol completeness:** Pipeline / Fan-out / Debate-Consensus orchestration
+  (Python + Java), a real planning turn for Supervisor+Workers, and **side-effect-class gating** so
+  the harness consults `tool.side_effect` before execution (T-5).
+- **Increment 4 (P2) — Production adapters & observability:** OpenTelemetry exporter, durable audit
+  store, real human-review queue + SLA enforcement, production LLM providers, complete Memory/Policy
+  ports, cross-process kill-switch, metrics/dashboard.
+- **Increment 5 (P3) — Adoption:** standalone (non-Aether) README + comparison table, more
+  examples (Python + Java), published API docs, CHANGELOG + stability/deprecation policy, a prominent
+  AGPL-3.0 implications note (license unchanged), a contract-validation CLI, and PyPI/Maven Central
+  publication (⧗ gated on registry credentials).
+- **Increment 6 (P4) — Test hardening & consumer migration:** concurrency/race tests, property-based
+  + fuzz, failure-injection E2E, cross-language interop, mutation testing, CI coverage/matrix/badge;
+  finish grid agent migrations; close the eeik manifest item.
+- **Increment 7 (P5) — Cross-language & formal conformance:** a thin TypeScript binding and a
+  language-agnostic conformance suite external implementations can run.
+
+Cross-cutting polish (stricter enforcement surface, configurable hierarchy above the safety floor,
+CONTRIBUTING/issue templates, dual-naming consistency) is interleaved. The gate-bypass invariant
+(`confidence_gate_bypass_total == 0`) governs every item.
