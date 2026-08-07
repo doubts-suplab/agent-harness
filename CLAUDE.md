@@ -24,8 +24,12 @@ It does **not** own prompts, business logic, memory content, or product UX.
 normative [harness protocol spec](docs/spec/harness-protocol.md), the
 [agent-contract JSON Schema](docs/spec/agent-contract.schema.json), the [decision records](docs/decisions/),
 and a Python 3.11+ reference runtime in `src/agent_harness/` (37 tests, 94% coverage). **Increment 2 in
-progress:** apex-sdlc consumes the harness (first real consumer). Tests run on Python 3.11 or 3.12
-(`python3 -m venv .venv && pip install -e ".[test]" && pytest`).
+progress:** apex-sdlc consumes the harness (first real consumer), plus the Java binding and aether-grid.
+Tests run on Python 3.11 or 3.12 (`python3 -m venv .venv && pip install -e ".[test]" && pytest`).
+
+**What's next:** a prioritized plan for Increments 3–7 (protocol completeness → production adapters →
+adoption → test hardening → cross-language + formal conformance) is tracked in
+[`docs/roadmap.md`](docs/roadmap.md), with feasibility ratings. Nothing in 3–7 has started.
 
 > **Bootstrapped from EEIK.** This repo follows the `eeik-bootstrap` conventions (CLAUDE.md, `.claude/`,
 > `project-manifest.yaml` provenance). It is activatable in downstream projects via the

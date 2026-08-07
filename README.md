@@ -63,6 +63,11 @@ phase agents** on the harness (Requirements, Architecture, Development, Testing,
 its [reference journey](https://github.com/doubts-suplab/apex-sdlc/blob/main/examples/reference-project/README.md)
 walks one project through every phase offline, with the harness — not the agents — deciding enforcement.
 
+**Roadmap:** the plan for Increments 3–7 — protocol completeness (remaining orchestration patterns +
+side-effect gating), production adapters & observability, adoption (packaging, examples, standalone
+docs), test hardening, and cross-language + formal conformance — is tracked with feasibility ratings in
+[`docs/roadmap.md`](docs/roadmap.md). Increments 3–7 are planned, not started.
+
 Specification:
 - [`docs/spec/harness-protocol.md`](docs/spec/harness-protocol.md) — the normative, language-neutral protocol.
 - [`docs/spec/agent-contract.schema.json`](docs/spec/agent-contract.schema.json) — machine-readable Agent Contract schema.
