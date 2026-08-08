@@ -25,7 +25,7 @@ Goal: decide the shape of the harness before writing runtime code.
 
 ## Increment 1 — Python reference implementation ✅ (in review)
 
-Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% coverage (runs on 3.11 and 3.12).
+Python 3.11+ framework-free core, `bindings/python/src/agent_harness/` (see [ADR-0012](decisions/ADR-0012-bindings-layout.md)).
 
 - [x] Core: `AgentInput`/`AgentOutput` envelope, two-axis authority/decision model (`core/model.py`)
 - [x] Centralized non-disableable confidence gate + bypass counter (`core/gate.py`)
@@ -51,7 +51,7 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
   dependency; **20 bridge/agent/journey tests green** on Python 3.11 (`pytest --noconftest tests/agents/`).
   apex docs/HTML synced (backend + master CLAUDE.md, README, ROADMAP, `docs/personas.md`, reference-journey
   page). Required lowering the harness `requires-python` to 3.11 (ADR-0002 amendment).
-- [x] **Java binding.** `java/` Maven module (`com.agentharness:agent-harness-java`, plain Java 21,
+- [x] **Java binding.** `bindings/java/` Maven module (`com.agentharness:agent-harness-java`, plain Java 21,
   framework-free) — the Java counterpart to the Python reference: envelope, centralized confidence gate,
   default-deny tool registry, Supervisor+Workers, ports + in-memory adapters, and an
   `interop.LegacyAgentAdapter` for grid. **22 JUnit tests green** (19 conformance + 2 interop + 1 stub) via `mvn test`.
@@ -108,6 +108,17 @@ Each pattern is implemented in **both** Python and Java, and every stage/worker 
   lets a supervisor select a subset of workers (constrained to the real roster); a plain supervisor
   delegates to all. `OrchestrationResult` gained `supervisor_output`, `delegated`, and `halted`.
   Tests: `tests/test_orchestration_supervisor.py` (6) + `OrchestrationTest` supervisor cases (5).
+- [x] **Side-effect gating (T-5, §5.3, ADR-0011).** The harness now consults a tool's side-effect class
+  *before execution*. `none`/`read` are ungated; `write`/`external` are gated on a per-call `confidence`
+  (defaults `write ≥ 0.85`, `external ≥ 0.95`) and forbidden to read-only (`OBSERVE`) agents. A failed
+  gated call is refused pre-effect, logged as a `side_effect_denied` security event, and resolved to a
+  safe `DEFER`. Policy thresholds are configurable (`SideEffectPolicy`); the gating cannot be disabled.
+  `ToolInvoker.call` gained a per-call `confidence` (Python kwarg / Java overload). Spec §5.2–5.3 + §9
+  updated; ADR-0011 added. Tests: `tests/test_side_effect_gating.py` (10) + `SideEffectGatingTest` (9).
+
+**Increment 3 status:** all four orchestration patterns (Pipeline, Fan-out, Debate/Consensus,
+Supervisor+Workers with a real planning turn) and side-effect gating are implemented in **both** Python
+and Java. Suite: **Python 74 tests**, **Java 54 tests**; `confidence_gate_bypass_total == 0`.
 
 ---
 

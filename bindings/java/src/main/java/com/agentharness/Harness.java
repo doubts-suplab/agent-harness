@@ -39,15 +39,23 @@ public final class Harness {
     private final ObservabilityPort observability;
     private final KillSwitchPort killSwitch;
     private final ConfidenceGate gate;
+    private final SideEffectPolicy sideEffectPolicy;
 
     public Harness(ToolRegistry registry, AuditPort audit, HumanReviewPort humanReview,
                    ObservabilityPort observability, KillSwitchPort killSwitch, ConfidenceGate gate) {
+        this(registry, audit, humanReview, observability, killSwitch, gate, SideEffectPolicy.defaults());
+    }
+
+    public Harness(ToolRegistry registry, AuditPort audit, HumanReviewPort humanReview,
+                   ObservabilityPort observability, KillSwitchPort killSwitch, ConfidenceGate gate,
+                   SideEffectPolicy sideEffectPolicy) {
         this.registry = registry;
         this.audit = audit;
         this.humanReview = humanReview;
         this.observability = observability;
         this.killSwitch = killSwitch;
         this.gate = gate;
+        this.sideEffectPolicy = sideEffectPolicy;
     }
 
     /** Convenience: a harness wired with in-memory reference adapters. */
@@ -82,12 +90,14 @@ public final class Harness {
     }
 
     private Ran runAgent(Agent agent, AgentInput request) {
-        ToolInvoker invoker = new BoundInvoker(agent.name(), request);
+        ToolInvoker invoker = new BoundInvoker(agent.name(), agent.authorityLevel(), request);
         Decision decision;
         try {
             decision = agent.decide(request, invoker);
         } catch (ToolNotAuthorizedException e) {
             return new Ran(FailureMode.TOOL_FAILURE.toDecision("unauthorized tool call"), "failure");
+        } catch (SideEffectDeniedException e) {
+            return new Ran(FailureMode.TOOL_FAILURE.toDecision("side-effect denied: " + e.toolName()), "failure");
         } catch (RuntimeException e) {
             return new Ran(FailureMode.BAD_OUTPUT.toDecision(e.getClass().getSimpleName()), "failure");
         }
@@ -153,22 +163,46 @@ public final class Harness {
     /** A ToolInvoker scoped to one agent + request; enforces the registry and records violations. */
     private final class BoundInvoker implements ToolInvoker {
         private final String agentName;
+        private final com.agentharness.model.AuthorityLevel authority;
         private final AgentInput request;
 
-        BoundInvoker(String agentName, AgentInput request) {
+        BoundInvoker(String agentName, com.agentharness.model.AuthorityLevel authority, AgentInput request) {
             this.agentName = agentName;
+            this.authority = authority;
             this.request = request;
         }
 
         @Override
         public Object call(String toolName, Map<String, Object> arguments) {
-            try {
-                return registry.invoke(agentName, toolName, arguments);
-            } catch (ToolNotAuthorizedException e) {
-                audit.recordSecurityEvent(new AuditPort.SecurityEvent(agentName, request.tenantId(),
-                        "tool_not_authorized", "tool=" + toolName, request.correlationId(), Instant.now()));
-                throw e;
+            return doCall(toolName, arguments, null);
+        }
+
+        @Override
+        public Object call(String toolName, Map<String, Object> arguments, double confidence) {
+            return doCall(toolName, arguments, confidence);
+        }
+
+        private Object doCall(String toolName, Map<String, Object> arguments, Double confidence) {
+            // 1) Default-deny authorization, before any side effect (spec §5 T-1/T-2).
+            if (!registry.isAuthorized(agentName, toolName)) {
+                securityEvent("tool_not_authorized", "tool=" + toolName);
+                throw new ToolNotAuthorizedException(agentName, toolName);
             }
+            // 2) Side-effect gating for write/external tools, before execution (spec §5.3 T-5).
+            String sideEffect = registry.sideEffect(toolName);
+            if (!sideEffectPolicy.permits(sideEffect, confidence, authority)) {
+                securityEvent("side_effect_denied",
+                        "tool=" + toolName + " class=" + sideEffect + " confidence=" + confidence);
+                throw new SideEffectDeniedException(agentName, toolName,
+                        sideEffect == null ? "unknown" : sideEffect);
+            }
+            // 3) Execute.
+            return registry.invoke(agentName, toolName, arguments);
+        }
+
+        private void securityEvent(String kind, String detail) {
+            audit.recordSecurityEvent(new AuditPort.SecurityEvent(agentName, request.tenantId(),
+                    kind, detail, request.correlationId(), Instant.now()));
         }
     }
 }

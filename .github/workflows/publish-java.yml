@@ -26,7 +26,7 @@ jobs:
           server-password: MAVEN_TOKEN
       - name: Deploy to GitHub Packages
         run: mvn -B -ntp deploy -DskipTests
-        working-directory: java
+        working-directory: bindings/java
         env:
           MAVEN_USERNAME: ${{ github.actor }}
           MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}

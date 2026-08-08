@@ -24,8 +24,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install
         run: pip install -e ".[test]"
+        working-directory: bindings/python
       - name: Test
         run: pytest
+        working-directory: bindings/python
 
   java:
     name: Java binding
@@ -39,4 +41,4 @@ jobs:
           cache: maven
       - name: Test
         run: mvn -B -ntp test
-        working-directory: java
+        working-directory: bindings/java

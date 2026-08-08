@@ -22,7 +22,7 @@ technology:
   reference_implementation:
     language: python
     version: "3.11+"         # developed on 3.12; floor 3.11 for consumer compatibility (apex-sdlc)
-    status: implemented      # Increment 1 complete; src/agent_harness/
+    status: implemented      # Increment 1 complete; bindings/python/src/agent_harness/
   llm:
     # The harness owns no LLM. LlmPort adopts the apex-sdlc provider-abstraction shape.
     runtime: pluggable

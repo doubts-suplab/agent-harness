@@ -191,7 +191,7 @@ not exist from the agent's perspective." — AIEL Phase 5.
 - **T-4.** A **supervisor** agent (§6.3) **MUST** hold an empty tool allowlist — it coordinates, it does not act.
 - **T-5.** Each registry entry **MUST** record the tool's name, description, JSON-Schema parameters, and
   declared side-effect class (`none | read | write | external`). The harness uses side-effect class to decide
-  whether a call is subject to the confidence gate before execution.
+  whether a call is subject to the confidence gate before execution (§5.3).
 
 ### 5.2 Tool call shape
 
@@ -200,8 +200,31 @@ Tool definitions and calls reuse the shape already proven in the apex-sdlc LLM p
 
 ```
 ToolDefinition { name, description, parameters: JSONSchema, sideEffect: none|read|write|external }
-ToolCall       { name, arguments: map, id }
+ToolCall       { name, arguments: map, id, confidence? }
 ```
+
+A `ToolCall` on a **gated** tool (§5.3) carries a `confidence`; on an ungated (`none`/`read`) tool it is
+ignored.
+
+### 5.3 Side-effect gating
+
+The harness consults a tool's side-effect class **before execution** (T-5) and applies a **side-effect
+policy**:
+
+- **SE-1.** `none` and `read` calls are **ungated** — they observe, they do not act.
+- **SE-2.** `write` and `external` calls are **gated**. A gated call **MUST** clear a per-class confidence
+  threshold (reference defaults: `write ≥ 0.85`, `external ≥ 0.95`, never below the gate's base floor of
+  0.80) supplied on the `ToolCall`. A call whose confidence is absent is treated as `0.0`.
+- **SE-3.** A **read-only agent** (authority `OBSERVE`) **MUST NOT** perform any gated side effect,
+  regardless of confidence.
+- **SE-4.** A gated call that fails SE-2 or SE-3 **MUST** be refused **before the side effect occurs** and
+  **MUST** be recorded as a security event (§7.3, `side_effect_denied`). The refusal resolves to a safe
+  failure default (§8) — the harness never executes the side effect and never fails open.
+- **SE-5.** The side-effect policy is configurable (thresholds), but the gating itself cannot be disabled;
+  it is the tool-call analogue of the confidence gate (§4).
+
+  > Source: `aether-iel/standards/governance-controls.md` §2.1 (tool-access governance); this operationalises
+  > the T-5 requirement that side-effect class gates execution.
 
 ---
 
@@ -312,6 +335,8 @@ An implementation is conformant only if all of the following hold. These are lif
 - [ ] **Gate bypass = 0.** `confidence_gate_bypass_total` is emitted and stays at 0 (§4.2).
 - [ ] **Tools default-deny.** Out-of-allowlist calls refused pre-effect and logged as security events (INV-2, §5).
 - [ ] **No wildcards.** Tool allowlists are explicit (T-3).
+- [ ] **Side-effect gating.** `write`/`external` calls are gated on confidence, blocked for `OBSERVE`
+  agents, and refused pre-effect with a security event when they fail (T-5, §5.3).
 - [ ] **Supervisor holds no tools.** (T-4)
 - [ ] **No self-escalation.** Authority is static per contract (INV-3).
 - [ ] **Audit append-only + PII-redacted.** BLOCK/ALERT carry explanations (INV-4, §7.3).

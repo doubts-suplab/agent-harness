@@ -20,15 +20,17 @@ not build. Products (e.g. apex-sdlc, aether-grid) **consume** it; it consumes no
 confidence gate, the runtime-enforced tool registry, the orchestration patterns, and the pluggable ports.
 It does **not** own prompts, business logic, memory content, or product UX.
 
-**Current status:** Increment 0 (spec) + Increment 1 (Python reference implementation) complete. Ships the
-normative [harness protocol spec](docs/spec/harness-protocol.md), the
+**Current status:** Increment 0 (spec) + Increment 1 (Python reference) + **Increment 3 (protocol
+completeness)** complete. Ships the normative [harness protocol spec](docs/spec/harness-protocol.md), the
 [agent-contract JSON Schema](docs/spec/agent-contract.schema.json), the [decision records](docs/decisions/),
-and a Python 3.11+ reference runtime in `src/agent_harness/` (37 tests, 94% coverage). **Increment 2 in
-progress:** apex-sdlc consumes the harness (first real consumer), plus the Java binding and aether-grid.
-Tests run on Python 3.11 or 3.12 (`python3 -m venv .venv && pip install -e ".[test]" && pytest`).
+and two peer bindings under `bindings/` — Python (`bindings/python/`) and Java (`bindings/java/`) — with
+all four orchestration patterns (§6) and side-effect gating (§5.3, T-5). **Increment 2 in progress:**
+apex-sdlc consumes the harness (first real consumer), plus aether-grid. Build/test: Python —
+`cd bindings/python && python3 -m venv .venv && pip install -e ".[test]" && pytest` (74 tests, 3.11/3.12);
+Java — `cd bindings/java && mvn test` (54 tests).
 
-**What's next:** a prioritized plan for Increments 3–7 (protocol completeness → production adapters →
-adoption → test hardening → cross-language + formal conformance) is tracked in
+**What's next:** a prioritized plan for Increments 4–7 (production adapters → adoption → test hardening →
+cross-language + formal conformance) is tracked in
 [`docs/roadmap.md`](docs/roadmap.md), with feasibility ratings. Nothing in 3–7 has started.
 
 > **Bootstrapped from EEIK.** This repo follows the `eeik-bootstrap` conventions (CLAUDE.md, `.claude/`,
@@ -53,7 +55,7 @@ adoption → test hardening → cross-language + formal conformance) is tracked 
 | Layer | Technology |
 |---|---|
 | Protocol | Language-neutral specification (Markdown + JSON Schema draft-07) |
-| Reference implementation | Python 3.11+ (`src/agent_harness/`) and a Java 21 binding (`java/`, `com.agentharness`) |
+| Reference implementation | Python 3.11+ (`bindings/python/`) and a Java 21 binding (`bindings/java/`, `com.agentharness`) |
 | LLM port shape | Adopted from the apex-sdlc provider abstraction (`Message`/`ToolDefinition`/`ToolCall`/`CompletionResult`) |
 | Docs | Markdown + a single-page `docs/index.html` mirroring the README |
 | License | AGPL-3.0 |
