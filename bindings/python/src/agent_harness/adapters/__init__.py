@@ -10,6 +10,7 @@ from .inmemory import (
     QueuedReview,
     redact,
 )
+from .file_audit import FileAudit
 from .llm_stub import StubLlm
 from .sla import HUMAN_REVIEW_SLA_BREACH, SlaMonitor
 
@@ -20,6 +21,7 @@ __all__ = [
     "InMemoryObservability",
     "QueuedReview",
     "redact",
+    "FileAudit",
     "StubLlm",
     "SlaMonitor",
     "HUMAN_REVIEW_SLA_BREACH",

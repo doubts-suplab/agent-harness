@@ -125,6 +125,12 @@ adapters live behind the existing port Protocols and are opt-in.
   `human_review_sla_breach_total`, counting each breach at most once (idempotent across sweeps).
   Python (`adapters/sla.py`) + Java (`adapters/SlaMonitor.java`). Tests:
   `tests/test_human_review_sla.py` (7) + `HumanReviewSlaTest` (7).
+- [x] **Durable append-only file `AuditPort` (§7.3).** `FileAudit` writes one JSON object per line
+  (JSONL) in append mode — no update/delete API, PII redacted before every write (INV-4). Read-back
+  helpers (`entries`/`security_events` in Python, `lines()` in Java) support inspection; the redactor is
+  injectable. Dependency-free (Java uses a small hand-rolled JSON writer). Python
+  (`adapters/file_audit.py`) + Java (`adapters/FileAudit.java`). Tests: `tests/test_file_audit.py` (5) +
+  `FileAuditTest` (4).
 
 ---
 
