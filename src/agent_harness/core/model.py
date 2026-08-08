@@ -66,6 +66,11 @@ def action_within_authority(action: DecisionAction, authority: AuthorityLevel) -
     return authority >= _ACTION_MIN_AUTHORITY[action]
 
 
+def action_precedence(action: DecisionAction) -> int:
+    """The Decision-Hierarchy precedence of an action (§3.3): higher = safer/stricter."""
+    return _ACTION_PRECEDENCE[action]
+
+
 def reconcile(actions: list[DecisionAction]) -> DecisionAction:
     """Reconcile competing decisions toward the safer action (spec §3.3, §6.2)."""
     if not actions:

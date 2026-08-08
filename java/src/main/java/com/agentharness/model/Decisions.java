@@ -31,6 +31,11 @@ public final class Decisions {
         return MIN_AUTHORITY.get(action);
     }
 
+    /** The Decision-Hierarchy precedence of an action (§3.3): higher = safer/stricter. */
+    public static int actionPrecedence(DecisionAction action) {
+        return PRECEDENCE.get(action);
+    }
+
     /** True if an agent at {@code authority} may emit {@code action} (spec §3.3). */
     public static boolean actionWithinAuthority(DecisionAction action, AuthorityLevel authority) {
         return authority.atLeast(MIN_AUTHORITY.get(action));

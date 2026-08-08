@@ -76,6 +76,41 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
 
 ---
 
+## Increment 3 — Protocol completeness 🚧 (in progress)
+
+Closing the gap between the normative spec (§6 orchestration, T-5 side-effect gating) and the runtime.
+Each pattern is implemented in **both** Python and Java, and every stage/worker still flows through
+`Harness.invoke` — so the confidence gate and tool registry apply individually (O-1) and
+`confidence_gate_bypass_total` stays 0.
+
+- [x] **Sequential Pipeline (§6.1).** `orchestration/pipeline.py` (Python) + `orchestration/Pipeline.java`
+  (Java). Stages run in order; each receives the prior stage's decision in `context["pipeline"]`; the
+  pipeline short-circuits on the first `BLOCK`/`DEFER`. `PipelineResult` exposes `final_action`,
+  ordered `stage_outputs`, `short_circuited_at`, and a `reconciled_action` (safest action seen).
+  Tests: `tests/test_orchestration_pipeline.py` (7) + `OrchestrationTest` pipeline cases (6).
+- [x] **Parallel Fan-out (§6.2).** `orchestration/fanout.py` (Python, `ThreadPoolExecutor`) +
+  `orchestration/FanOut.java` (Java, fixed thread pool). Independent workers run concurrently over the
+  same input; results are collected order-stably and reconciled via the Decision Hierarchy
+  (`FanOutResult`). Concurrency is proven by a barrier test in each language; the reference in-memory
+  adapters are concurrency-safe (Python: bypass counter now incremented under a lock; Java:
+  `CopyOnWriteArrayList` + `ConcurrentHashMap`), so `confidence_gate_bypass_total` accumulates
+  correctly. Tests: `tests/test_orchestration_fanout.py` (6) + `OrchestrationTest` fan-out cases (5).
+- [x] **Debate / Consensus (§6.4).** `orchestration/debate.py` (Python) + `orchestration/Debate.java`
+  (Java). Competing agents produce decisions reconciled by a `ConsensusRule`: `SAFEST` (default —
+  strictest action wins per the hierarchy) or `MAJORITY` (plurality; tie → `DEFER`/human review, and
+  may de-escalate below the strictest proposal). The **safety floor** is enforced and tested: consensus
+  never exceeds the strictest action any participant proposed, nor the strictest participant's authority.
+  Added a public `action_precedence`/`Decisions.actionPrecedence` accessor for the §3.3 hierarchy.
+  Tests: `tests/test_orchestration_debate.py` (8) + `OrchestrationTest` debate cases (7).
+- [x] **Supervisor + Workers — real planning turn (§6.3).** The supervisor is now invoked *through the
+  harness* (governed, tool-less): its planning decision passes the gate/kill-switch/audit (O-1), and a
+  `BLOCK`/`DEFER` decision **halts delegation** before any worker runs. An optional `Planner` interface
+  lets a supervisor select a subset of workers (constrained to the real roster); a plain supervisor
+  delegates to all. `OrchestrationResult` gained `supervisor_output`, `delegated`, and `halted`.
+  Tests: `tests/test_orchestration_supervisor.py` (6) + `OrchestrationTest` supervisor cases (5).
+
+---
+
 ## Planned next — Increments 3–7
 
 Not started. Tracked with feasibility + priority in [`roadmap.md`](roadmap.md):

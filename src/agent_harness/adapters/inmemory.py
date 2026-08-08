@@ -7,6 +7,7 @@ These implement the port Protocols and depend on the core — never the reverse 
 from __future__ import annotations
 
 import re
+import threading
 from dataclasses import replace
 
 from ..ports.governance import (
@@ -74,12 +75,16 @@ class InMemoryObservability:
     def __init__(self) -> None:
         self._metrics: list[InvocationMetric] = []
         self._counters: dict[str, int] = {}
+        # Counter increments are a read-modify-write; guard them so concurrent fan-out workers
+        # (spec §6.2) accumulate the bypass counter safely. list.append is atomic under the GIL.
+        self._lock = threading.Lock()
 
     def emit(self, metric: InvocationMetric) -> None:
         self._metrics.append(metric)
 
     def increment_counter(self, name: str, value: int = 1) -> None:
-        self._counters[name] = self._counters.get(name, 0) + value
+        with self._lock:
+            self._counters[name] = self._counters.get(name, 0) + value
 
     def counter(self, name: str) -> int:
         return self._counters.get(name, 0)
