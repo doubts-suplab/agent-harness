@@ -8,12 +8,15 @@ from __future__ import annotations
 
 import re
 import threading
-from dataclasses import replace
+from dataclasses import dataclass, replace
+
+from datetime import datetime, timezone
 
 from ..ports.governance import (
     AuditEntry,
     HumanReviewPort,
     InvocationMetric,
+    OverrideRecord,
     ReviewItem,
     SecurityEvent,
 )
@@ -59,16 +62,74 @@ class InMemoryAudit:
         return tuple(self._security_events)
 
 
-class InMemoryHumanReview(HumanReviewPort):
-    def __init__(self) -> None:
-        self._items: list[ReviewItem] = []
+@dataclass
+class QueuedReview:
+    """A queued review item with a stable id and resolution state (spec §7.4)."""
 
-    def enqueue(self, item: ReviewItem) -> None:
-        self._items.append(item)
+    id: int
+    item: ReviewItem
+    resolved: bool = False
+    override: OverrideRecord | None = None
+
+
+class InMemoryHumanReview(HumanReviewPort):
+    """Human-review queue with SLA tracking and an audited override endpoint (spec §7.4).
+
+    Beyond ``enqueue``, it assigns each item a stable id, distinguishes pending vs resolved,
+    exposes overdue (SLA-breached) items for a monitor to sweep, and records human overrides.
+    """
+
+    def __init__(self) -> None:
+        self._queue: list[QueuedReview] = []
+        self._next_id = 0
+
+    def enqueue(self, item: ReviewItem) -> int:
+        review_id = self._next_id
+        self._next_id += 1
+        self._queue.append(QueuedReview(id=review_id, item=item))
+        return review_id
 
     @property
     def items(self) -> tuple[ReviewItem, ...]:
-        return tuple(self._items)
+        return tuple(q.item for q in self._queue)
+
+    @property
+    def queued(self) -> tuple[QueuedReview, ...]:
+        return tuple(self._queue)
+
+    def pending(self) -> tuple[QueuedReview, ...]:
+        return tuple(q for q in self._queue if not q.resolved)
+
+    def overdue(self, now: datetime | None = None) -> tuple[QueuedReview, ...]:
+        """Pending items whose SLA deadline has passed (spec §7.4)."""
+        moment = now or datetime.now(timezone.utc)
+        return tuple(q for q in self.pending() if q.item.is_overdue(moment))
+
+    def resolve(self, review_id: int, reviewer: str, outcome: str) -> OverrideRecord:
+        """Record a human override of a queued decision (spec §7.4 — overrides are audited).
+
+        Returns the ``OverrideRecord`` so the caller can write it to the AuditPort.
+        """
+        q = self._find(review_id)
+        if q.resolved:
+            raise ValueError(f"review {review_id} is already resolved")
+        record = OverrideRecord(
+            review_id=review_id,
+            agent_name=q.item.agent_name,
+            tenant_id=q.item.request.tenant_id,
+            reviewer=reviewer,
+            outcome=outcome,
+            resolved_at=datetime.now(timezone.utc),
+        )
+        q.resolved = True
+        q.override = record
+        return record
+
+    def _find(self, review_id: int) -> QueuedReview:
+        for q in self._queue:
+            if q.id == review_id:
+                return q
+        raise KeyError(f"no review with id {review_id}")
 
 
 class InMemoryObservability:

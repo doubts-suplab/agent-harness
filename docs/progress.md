@@ -113,13 +113,25 @@ and Java. Suite: **Python 74 tests**, **Java 54 tests**; `confidence_gate_bypass
 
 ---
 
-## Planned next — Increments 3–7
+## Increment 4 — Production adapters & observability 🚧 (in progress)
 
-Not started. Tracked with feasibility + priority in [`roadmap.md`](roadmap.md):
+Making the "pluggable ports" claim credible with real, optional adapters. The core stays framework-free;
+adapters live behind the existing port Protocols and are opt-in.
 
-- **Increment 3 (P1) — Protocol completeness:** Pipeline / Fan-out / Debate-Consensus orchestration
-  (Python + Java), a real planning turn for Supervisor+Workers, and **side-effect-class gating** so
-  the harness consults `tool.side_effect` before execution (T-5).
+- [x] **Human-review SLA enforcement + monitoring (§7.4).** `ReviewItem` gained a `deadline` /
+  `is_overdue`; the reference queue (`InMemoryHumanReview`) now assigns each item a stable id,
+  distinguishes `pending` vs resolved, exposes an `overdue` sweep, and has an audited override endpoint
+  (`resolve` → `OverrideRecord`). A new `SlaMonitor` sweeps the queue and emits
+  `human_review_sla_breach_total`, counting each breach at most once (idempotent across sweeps).
+  Python (`adapters/sla.py`) + Java (`adapters/SlaMonitor.java`). Tests:
+  `tests/test_human_review_sla.py` (7) + `HumanReviewSlaTest` (7).
+
+---
+
+## Planned next — Increments 4–7
+
+Tracked with feasibility + priority in [`roadmap.md`](roadmap.md):
+
 - **Increment 4 (P2) — Production adapters & observability:** OpenTelemetry exporter, durable audit
   store, real human-review queue + SLA enforcement, production LLM providers, complete Memory/Policy
   ports, cross-process kill-switch, metrics/dashboard.
