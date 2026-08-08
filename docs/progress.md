@@ -144,6 +144,12 @@ adapters live behind the existing port Protocols and are opt-in.
   a durable file. Python (`adapters/memory.py`, `adapters/policy.py`) + Java (`InMemoryMemory`,
   `FileMemory`, `PolicyPort`, `RuleBasedPolicy`). Tests: `tests/test_memory_policy.py` (13) +
   `MemoryPolicyTest` (7).
+- [x] **Pluggable richer redaction (§7.3).** Redaction is now a `RedactionStrategy` — an ordered,
+  immutable rule set that is *callable* and drops into any port taking a `redactor`. The default covers
+  the built-in patterns (JWT/email/card/SSN/phone/key); `with_rule` extends it without mutating the base;
+  audit adapters (`InMemoryAudit`, `FileAudit`) accept a custom strategy. The default `redact` free
+  function is preserved. Python (`adapters/redaction.py`) + Java (`adapters/RedactionStrategy.java`,
+  `Redaction` now a thin facade). Tests: `tests/test_redaction.py` (5) + `RedactionStrategyTest` (4).
 
 ---
 

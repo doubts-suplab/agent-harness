@@ -15,6 +15,7 @@ from .file_kill_switch import FileKillSwitch
 from .llm_stub import StubLlm
 from .memory import FileMemory, InMemoryMemory
 from .policy import PolicyRule, RuleBasedPolicy, load_policy
+from .redaction import DEFAULT_STRATEGY, RedactionRule, RedactionStrategy
 from .sla import HUMAN_REVIEW_SLA_BREACH, SlaMonitor
 
 __all__ = [
@@ -24,6 +25,9 @@ __all__ = [
     "InMemoryObservability",
     "QueuedReview",
     "redact",
+    "RedactionStrategy",
+    "RedactionRule",
+    "DEFAULT_STRATEGY",
     "FileAudit",
     "FileKillSwitch",
     "InMemoryMemory",

@@ -6,11 +6,10 @@ These implement the port Protocols and depend on the core — never the reverse 
 
 from __future__ import annotations
 
-import re
 import threading
 from dataclasses import dataclass, replace
-
 from datetime import datetime, timezone
+from typing import Callable
 
 from ..ports.governance import (
     AuditEntry,
@@ -20,38 +19,26 @@ from ..ports.governance import (
     ReviewItem,
     SecurityEvent,
 )
-
-# spec §7.3: redact PII before any audit write. Order matters (JWT/card before generic digits).
-_PII_PATTERNS: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+"), "[REDACTED_JWT]"),
-    (re.compile(r"\b[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}\b"), "[REDACTED_EMAIL]"),
-    (re.compile(r"\b(?:\d[ -]*?){13,16}\b"), "[REDACTED_CARD]"),
-    (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), "[REDACTED_SSN]"),
-    (re.compile(r"\b(?:\+?\d[\d -]{8,}\d)\b"), "[REDACTED_PHONE]"),
-    (re.compile(r"\b(?:sk|pk|ghp|xox[baprs])[-_][A-Za-z0-9]{8,}\b"), "[REDACTED_KEY]"),
-]
-
-
-def redact(text: str) -> str:
-    """Redact common PII/secret patterns (spec §7.3). Zero PII in logs is a P1 condition."""
-    out = text
-    for pattern, replacement in _PII_PATTERNS:
-        out = pattern.sub(replacement, out)
-    return out
+from .redaction import redact  # re-exported for backwards compatibility
 
 
 class InMemoryAudit:
-    """Append-only audit log (spec §7.3). No update/delete API is exposed; PII is redacted on write."""
+    """Append-only audit log (spec §7.3). No update/delete API is exposed; PII is redacted on write.
 
-    def __init__(self) -> None:
+    The redaction strategy is pluggable — pass any ``Callable[[str], str]`` (e.g. a customized
+    ``RedactionStrategy``); it defaults to the built-in patterns.
+    """
+
+    def __init__(self, *, redactor: Callable[[str], str] = redact) -> None:
         self._entries: list[AuditEntry] = []
         self._security_events: list[SecurityEvent] = []
+        self._redact = redactor
 
     def record(self, entry: AuditEntry) -> None:
-        self._entries.append(replace(entry, rationale=redact(entry.rationale)))
+        self._entries.append(replace(entry, rationale=self._redact(entry.rationale)))
 
     def record_security_event(self, event: SecurityEvent) -> None:
-        self._security_events.append(replace(event, detail=redact(event.detail)))
+        self._security_events.append(replace(event, detail=self._redact(event.detail)))
 
     @property
     def entries(self) -> tuple[AuditEntry, ...]:
