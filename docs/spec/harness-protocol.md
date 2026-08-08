@@ -4,7 +4,7 @@
 > **Conformance:** An implementation is *harness-conformant* if it satisfies every rule marked **MUST**
 > in this document and passes the [Conformance Checklist](#9-conformance-checklist).
 > **Provenance:** This protocol is a generic implementation of the "agent runtime" that the
-> [Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/suplab/aether-iel) specifies but
+> [Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/doubts-suplab/aether-iel) specifies but
 > deliberately does not build. Every normative rule cites its AIEL source. The harness is **brand-neutral**:
 > it depends on no Aether product and imports no product internals.
 

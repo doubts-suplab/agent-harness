@@ -13,7 +13,7 @@ repo and coordinates stay `agent-harness` / `com.agentharness` / `agent_harness`
 
 It is deliberately **vendor-neutral**: it depends on no product, imports no product internals, and is not
 owned by any single application — a first-class peer of APEX, EEIK, and Aether. It is a generic implementation of the "agent runtime" that the
-[Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/suplab/aether-iel) specifies but does
+[Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/doubts-suplab/aether-iel) specifies but does
 not build. Products (e.g. apex-sdlc, aether-grid) **consume** it; it consumes nothing from them.
 
 **Capability owned (exclusively):** the *agent execution contract* — the typed I/O envelope, the centralized
