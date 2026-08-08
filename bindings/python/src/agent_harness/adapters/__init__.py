@@ -11,6 +11,7 @@ from .inmemory import (
     redact,
 )
 from .file_audit import FileAudit
+from .file_kill_switch import FileKillSwitch
 from .llm_stub import StubLlm
 from .sla import HUMAN_REVIEW_SLA_BREACH, SlaMonitor
 
@@ -22,6 +23,7 @@ __all__ = [
     "QueuedReview",
     "redact",
     "FileAudit",
+    "FileKillSwitch",
     "StubLlm",
     "SlaMonitor",
     "HUMAN_REVIEW_SLA_BREACH",

@@ -131,6 +131,12 @@ adapters live behind the existing port Protocols and are opt-in.
   injectable. Dependency-free (Java uses a small hand-rolled JSON writer). Python
   (`adapters/file_audit.py`) + Java (`adapters/FileAudit.java`). Tests: `tests/test_file_audit.py` (5) +
   `FileAuditTest` (4).
+- [x] **Cross-process kill switch (§7.6).** `FileKillSwitch` is engaged iff a shared signal file exists;
+  `is_engaged` reads the filesystem each call, so a trip in one process (or an operator's `touch`)
+  propagates to every process on the same path. `engage`/`disengage` are idempotent. Proven end-to-end:
+  an engaged switch routes every invocation to human review (`DEFER`, never auto-enforced). Python
+  (`adapters/file_kill_switch.py`) + Java (`adapters/FileKillSwitch.java`). Tests:
+  `tests/test_file_kill_switch.py` (4) + `FileKillSwitchTest` (4).
 
 ---
 
