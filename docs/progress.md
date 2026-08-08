@@ -25,7 +25,7 @@ Goal: decide the shape of the harness before writing runtime code.
 
 ## Increment 1 — Python reference implementation ✅ (in review)
 
-Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% coverage (runs on 3.11 and 3.12).
+Python 3.11+ framework-free core, `bindings/python/src/agent_harness/` (see [ADR-0012](decisions/ADR-0012-bindings-layout.md)).
 
 - [x] Core: `AgentInput`/`AgentOutput` envelope, two-axis authority/decision model (`core/model.py`)
 - [x] Centralized non-disableable confidence gate + bypass counter (`core/gate.py`)
@@ -51,7 +51,7 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
   dependency; **20 bridge/agent/journey tests green** on Python 3.11 (`pytest --noconftest tests/agents/`).
   apex docs/HTML synced (backend + master CLAUDE.md, README, ROADMAP, `docs/personas.md`, reference-journey
   page). Required lowering the harness `requires-python` to 3.11 (ADR-0002 amendment).
-- [x] **Java binding.** `java/` Maven module (`com.agentharness:agent-harness-java`, plain Java 21,
+- [x] **Java binding.** `bindings/java/` Maven module (`com.agentharness:agent-harness-java`, plain Java 21,
   framework-free) — the Java counterpart to the Python reference: envelope, centralized confidence gate,
   default-deny tool registry, Supervisor+Workers, ports + in-memory adapters, and an
   `interop.LegacyAgentAdapter` for grid. **22 JUnit tests green** (19 conformance + 2 interop + 1 stub) via `mvn test`.

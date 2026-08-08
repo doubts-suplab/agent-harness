@@ -1,6 +1,6 @@
 # agent-harness — Java binding
 
-The Java binding of the [harness protocol](../docs/spec/harness-protocol.md) — the counterpart to the
+The Java binding of the [harness protocol](../../docs/spec/harness-protocol.md) — the counterpart to the
 Python reference implementation. Plain **Java 21**, framework-free (no Spring), brand-neutral
 (`com.agentharness`). Same normative behaviour, same §9 conformance checklist.
 

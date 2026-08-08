@@ -9,7 +9,8 @@ import pytest
 from agent_harness.contract import load_contract, load_schema, validate_contract
 from agent_harness.core.errors import ContractValidationError
 
-REPO = Path(__file__).resolve().parents[1]
+# Repo root: this file lives at <root>/bindings/python/tests/, so the canonical docs are three up.
+REPO = Path(__file__).resolve().parents[3]
 EXAMPLE = REPO / "docs" / "spec" / "examples" / "governance-agent.contract.json"
 
 
