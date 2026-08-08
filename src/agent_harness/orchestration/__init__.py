@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
+from .fanout import FanOut, FanOutResult
 from .pipeline import Pipeline, PipelineResult
 from .supervisor import OrchestrationResult, SupervisorWorkers
 
-__all__ = ["OrchestrationResult", "SupervisorWorkers", "Pipeline", "PipelineResult"]
+__all__ = [
+    "OrchestrationResult",
+    "SupervisorWorkers",
+    "Pipeline",
+    "PipelineResult",
+    "FanOut",
+    "FanOutResult",
+]

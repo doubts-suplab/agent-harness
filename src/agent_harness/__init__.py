@@ -29,6 +29,7 @@ from .core.model import (
     reconcile,
 )
 from .core.registry import ToolRegistry
+from .orchestration.fanout import FanOut, FanOutResult
 from .orchestration.pipeline import Pipeline, PipelineResult
 from .orchestration.supervisor import OrchestrationResult, SupervisorWorkers
 
@@ -54,6 +55,8 @@ __all__ = [
     "OrchestrationResult",
     "Pipeline",
     "PipelineResult",
+    "FanOut",
+    "FanOutResult",
     "FailureMode",
     "default_for",
     "HarnessError",

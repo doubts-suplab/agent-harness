@@ -59,7 +59,9 @@ public final class Pipeline {
             current = withPrior(request, stage.name(), output);
         }
 
-        return new PipelineResult(finalAction, Map.copyOf(outputs), shortCircuitedAt);
+        // Preserve execution order (Map.copyOf does not) so stage_outputs is order-stable.
+        Map<String, AgentOutput> ordered = java.util.Collections.unmodifiableMap(new LinkedHashMap<>(outputs));
+        return new PipelineResult(finalAction, ordered, shortCircuitedAt);
     }
 
     /**

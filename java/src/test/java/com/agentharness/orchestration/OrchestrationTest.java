@@ -147,4 +147,65 @@ class OrchestrationTest {
     void pipelineRequiresAtLeastOneStage() {
         assertThrows(IllegalArgumentException.class, () -> new Pipeline(harness, List.of()));
     }
+
+    // -- Fan-out (§6.2) ----------------------------------------------------
+    @Test
+    void fanOutRunsAllWorkersAndReconcilesToSafest() {
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.ALLOW, 0.9),
+                fixed("w2", DecisionAction.ALERT, 0.9),
+                fixed("w3", DecisionAction.BLOCK, 0.97));
+        FanOutResult result = new FanOut(harness, workers).run(REQ);
+        assertEquals(DecisionAction.BLOCK, result.reconciledAction()); // BLOCK wins the hierarchy
+        assertEquals(Set.of("w1", "w2", "w3"), result.workerOutputs().keySet());
+    }
+
+    @Test
+    void fanOutWorkerOutputsAreOrderStable() {
+        List<Agent> workers = List.of(
+                fixed("w0", DecisionAction.ALLOW, 0.9),
+                fixed("w1", DecisionAction.ALLOW, 0.9),
+                fixed("w2", DecisionAction.ALLOW, 0.9));
+        FanOutResult result = new FanOut(harness, workers).run(REQ);
+        assertEquals(List.of("w0", "w1", "w2"), List.copyOf(result.workerOutputs().keySet()));
+    }
+
+    @Test
+    void fanOutEachWorkerPassesGateBypassZero() {
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.BLOCK, 0.97),
+                fixed("w2", DecisionAction.ALERT, 0.9));
+        new FanOut(harness, workers).run(REQ);
+        assertEquals(0, obs.counter(Harness.BYPASS_COUNTER));
+        assertEquals(2, audit.entries().size()); // O-1: each worker went through the harness
+    }
+
+    @Test
+    void fanOutActuallyRunsWorkersConcurrently() throws Exception {
+        // A barrier of N only releases if all N workers reach it at once. If fan-out ran sequentially,
+        // the first worker's await would time out and the harness would return a safe DEFER instead of
+        // the intended ALERT.
+        int n = 4;
+        java.util.concurrent.CyclicBarrier barrier = new java.util.concurrent.CyclicBarrier(n);
+        List<Agent> workers = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            workers.add(agent("w" + i, (in, t) -> {
+                try {
+                    barrier.await(3, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                return Decision.propose(DecisionAction.ALERT, 0.9, "reached the barrier");
+            }));
+        }
+        FanOutResult result = new FanOut(harness, workers).run(REQ);
+        assertEquals(DecisionAction.ALERT, result.reconciledAction());
+        assertTrue(result.workerOutputs().values().stream()
+                .allMatch(o -> o.decision().action() == DecisionAction.ALERT));
+    }
+
+    @Test
+    void fanOutRequiresAtLeastOneWorker() {
+        assertThrows(IllegalArgumentException.class, () -> new FanOut(harness, List.of()));
+    }
 }
