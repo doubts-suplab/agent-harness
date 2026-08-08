@@ -99,6 +99,17 @@ Each pattern is implemented in **both** Python and Java, and every stage/worker 
   lets a supervisor select a subset of workers (constrained to the real roster); a plain supervisor
   delegates to all. `OrchestrationResult` gained `supervisor_output`, `delegated`, and `halted`.
   Tests: `tests/test_orchestration_supervisor.py` (6) + `OrchestrationTest` supervisor cases (5).
+- [x] **Side-effect gating (T-5, §5.3, ADR-0011).** The harness now consults a tool's side-effect class
+  *before execution*. `none`/`read` are ungated; `write`/`external` are gated on a per-call `confidence`
+  (defaults `write ≥ 0.85`, `external ≥ 0.95`) and forbidden to read-only (`OBSERVE`) agents. A failed
+  gated call is refused pre-effect, logged as a `side_effect_denied` security event, and resolved to a
+  safe `DEFER`. Policy thresholds are configurable (`SideEffectPolicy`); the gating cannot be disabled.
+  `ToolInvoker.call` gained a per-call `confidence` (Python kwarg / Java overload). Spec §5.2–5.3 + §9
+  updated; ADR-0011 added. Tests: `tests/test_side_effect_gating.py` (10) + `SideEffectGatingTest` (9).
+
+**Increment 3 status:** all four orchestration patterns (Pipeline, Fan-out, Debate/Consensus,
+Supervisor+Workers with a real planning turn) and side-effect gating are implemented in **both** Python
+and Java. Suite: **Python 74 tests**, **Java 54 tests**; `confidence_gate_bypass_total == 0`.
 
 ---
 

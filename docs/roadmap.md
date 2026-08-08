@@ -4,8 +4,9 @@
 > priority order. Companion to [`progress.md`](progress.md), which records what has shipped.
 >
 > **Status snapshot:** Increment 0 (spec) ✅ · Increment 1 (Python reference) ✅ · Increment 2
-> (consumers: apex-sdlc, Java binding, aether-grid) 🚧. Everything below is **planned, not started** —
-> this document exists to track scope and feasibility, not to claim delivery.
+> (consumers: apex-sdlc, Java binding, aether-grid) 🚧 · **Increment 3 (protocol completeness:
+> orchestration + side-effect gating) ✅** — delivered in both languages (see
+> [`progress.md`](progress.md)). Increments 4–7 below are **planned, not started**.
 
 ---
 
@@ -33,7 +34,11 @@ orchestration, adapters, and side-effect gating all route through `Harness.invok
 
 ---
 
-## Increment 3 — Protocol completeness (P1)
+## Increment 3 — Protocol completeness (P1) ✅ Delivered
+
+> **Delivered** in both Python and Java: Pipeline (§6.1), Fan-out (§6.2), Debate/Consensus (§6.4), a
+> real Supervisor+Workers planning turn (§6.3), and side-effect gating (T-5, §5.3, ADR-0011). Spec +
+> §9 conformance extended. See [`progress.md`](progress.md#increment-3--protocol-completeness--in-progress).
 
 Close the gap between the normative spec (`docs/spec/harness-protocol.md`, ADR-0007) and the runtime.
 

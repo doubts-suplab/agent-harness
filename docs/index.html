@@ -207,7 +207,7 @@
   <body>
     <div class="wrap">
       <header>
-        <span class="tag">Increment 2 · Consumers &amp; Java binding</span>
+        <span class="tag">Increment 3 · Protocol completeness</span>
         <h1>HALO</h1>
         <p class="lead">
           <strong>Harness for Agent Lifecycle &amp; Oversight.</strong> A
@@ -237,12 +237,12 @@
             alt="Java 21"
           />
           <img
-            src="https://img.shields.io/badge/tests-Python%2037%20%C2%B7%20Java%2022-brightgreen.svg"
+            src="https://img.shields.io/badge/tests-Python%2074%20%C2%B7%20Java%2054-brightgreen.svg"
             alt="Tests"
           />
           <img
-            src="https://img.shields.io/badge/coverage-94%25-brightgreen.svg"
-            alt="Coverage"
+            src="https://img.shields.io/badge/orchestration-4%20patterns-6f42c1.svg"
+            alt="Orchestration: 4 patterns"
           />
           <a href="spec/harness-protocol.md"
             ><img
@@ -398,20 +398,26 @@
         <strong>Increment 0</strong> shipped the normative
         <a href="spec/harness-protocol.md">protocol spec</a>, the
         <a href="spec/agent-contract.schema.json">Agent Contract schema</a>, and
-        <a href="decisions/">ADR-0001..0009</a>.
+        <a href="decisions/">ADR-0001..0011</a>.
         <strong>Increment 1</strong> added the Python 3.11+ reference runtime in
         <code>src/agent_harness/</code> — a framework-free core (envelope, gate,
         registry, harness), Supervisor+Workers, port Protocols with in-memory
-        adapters, and a contract loader — 37 tests at 94% coverage.
+        adapters, and a contract loader.
         <strong>Increment 2</strong> ships two real bindings/consumers: a
         <strong>Java 21 binding</strong> (<code>java/</code>,
-        <code>com.agentharness</code>, 22 JUnit tests) with a grid migration
-        adapter, and <strong>apex-sdlc</strong> running
-        <strong>all seven</strong> of its SDLC phase agents on the harness, with
-        a runnable reference journey that walks one project through every phase
-        offline (the harness, not the agents, decides enforcement). Every
-        binding maps 1:1 to the spec §9 conformance checklist. Next: aether-grid
-        consumes the Java binding. See <a href="progress.md">progress.md</a>.
+        <code>com.agentharness</code>) with a grid migration adapter, and
+        <strong>apex-sdlc</strong> running <strong>all seven</strong> of its
+        SDLC phase agents on the harness, with a runnable reference journey that
+        walks one project through every phase offline (the harness, not the
+        agents, decides enforcement).
+        <strong>Increment 3</strong> completes the protocol in both languages:
+        all four orchestration patterns (Pipeline, Fan-out, Debate/Consensus,
+        and Supervisor+Workers with a governed planning turn) plus
+        <strong>side-effect gating</strong> (T-5, §5.3, ADR-0011) — the harness
+        refuses ungoverned <code>write</code>/<code>external</code> tool calls
+        before they execute. Every binding maps 1:1 to the spec §9 conformance
+        checklist (<strong>Python 74</strong> · <strong>Java 54</strong> tests).
+        See <a href="progress.md">progress.md</a>.
       </p>
 
       <div class="note">

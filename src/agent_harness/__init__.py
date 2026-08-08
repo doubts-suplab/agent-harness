@@ -11,6 +11,7 @@ from .core.errors import (
     AuthorityViolationError,
     ContractValidationError,
     HarnessError,
+    SideEffectDeniedError,
     ToolNotAuthorizedError,
     ToolRegistrationError,
     UnscopedInvocationError,
@@ -30,6 +31,7 @@ from .core.model import (
     reconcile,
 )
 from .core.registry import ToolRegistry
+from .core.side_effect import GATED_CLASSES, SideEffectPolicy
 from .orchestration.debate import ConsensusRule, Debate, DebateResult
 from .orchestration.fanout import FanOut, FanOutResult
 from .orchestration.pipeline import Pipeline, PipelineResult
@@ -51,6 +53,8 @@ __all__ = [
     "reconcile",
     "ConfidenceGate",
     "BASE_THRESHOLD",
+    "SideEffectPolicy",
+    "GATED_CLASSES",
     "ToolRegistry",
     "Harness",
     "BYPASS_COUNTER",
@@ -70,6 +74,7 @@ __all__ = [
     "UnscopedInvocationError",
     "ToolNotAuthorizedError",
     "ToolRegistrationError",
+    "SideEffectDeniedError",
     "AuthorityViolationError",
     "ContractValidationError",
     "__version__",

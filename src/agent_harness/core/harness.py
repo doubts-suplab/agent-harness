@@ -23,17 +23,19 @@ from ..ports.governance import (
     SecurityEvent,
 )
 from .agent import Agent
-from .errors import ToolNotAuthorizedError, UnscopedInvocationError
+from .errors import SideEffectDeniedError, ToolNotAuthorizedError, UnscopedInvocationError
 from .failure import FailureMode, default_for
 from .gate import ConfidenceGate
 from .model import (
     AgentInput,
     AgentOutput,
+    AuthorityLevel,
     Decision,
     DecisionAction,
     action_within_authority,
 )
 from .registry import ToolRegistry
+from .side_effect import SideEffectPolicy
 
 BYPASS_COUNTER = "confidence_gate_bypass_total"
 
@@ -49,26 +51,41 @@ def _now() -> datetime:
 class _BoundInvoker:
     """A ToolInvoker scoped to one agent + request; enforces the registry and records violations."""
 
-    def __init__(self, harness: "Harness", agent_name: str, request: AgentInput) -> None:
+    def __init__(self, harness: "Harness", agent_name: str, authority: AuthorityLevel, request: AgentInput) -> None:
         self._h = harness
         self._agent = agent_name
+        self._authority = authority
         self._request = request
 
-    def call(self, tool_name: str, arguments: dict[str, Any]) -> Any:
-        try:
-            return self._h.registry.invoke(self._agent, tool_name, arguments)
-        except ToolNotAuthorizedError as exc:
-            self._h.audit.record_security_event(
-                SecurityEvent(
-                    agent_name=self._agent,
-                    tenant_id=self._request.tenant_id,
-                    kind="tool_not_authorized",
-                    detail=f"tool={tool_name}",
-                    correlation_id=self._request.correlation_id,
-                    recorded_at=_now(),
-                )
+    def call(self, tool_name: str, arguments: dict[str, Any], *, confidence: float | None = None) -> Any:
+        # 1) Default-deny authorization, before any side effect (spec §5 T-1/T-2).
+        if not self._h.registry.is_authorized(self._agent, tool_name):
+            self._security_event("tool_not_authorized", f"tool={tool_name}")
+            raise ToolNotAuthorizedError(self._agent, tool_name)
+
+        # 2) Side-effect gating for write/external tools, before execution (spec §5.3 T-5).
+        side_effect = self._h.registry.side_effect(tool_name)
+        if not self._h.side_effect_policy.permits(side_effect, confidence, self._authority):
+            self._security_event(
+                "side_effect_denied",
+                f"tool={tool_name} class={side_effect} confidence={confidence}",
             )
-            raise
+            raise SideEffectDeniedError(self._agent, tool_name, side_effect or "unknown")
+
+        # 3) Execute.
+        return self._h.registry.invoke(self._agent, tool_name, arguments)
+
+    def _security_event(self, kind: str, detail: str) -> None:
+        self._h.audit.record_security_event(
+            SecurityEvent(
+                agent_name=self._agent,
+                tenant_id=self._request.tenant_id,
+                kind=kind,
+                detail=detail,
+                correlation_id=self._request.correlation_id,
+                recorded_at=_now(),
+            )
+        )
 
 
 class Harness:
@@ -83,6 +100,7 @@ class Harness:
         observability: ObservabilityPort | None = None,
         kill_switch: KillSwitchPort | None = None,
         gate: ConfidenceGate | None = None,
+        side_effect_policy: SideEffectPolicy | None = None,
     ) -> None:
         # Lazily import the in-memory reference adapters so the core stays import-pure (INV-5):
         # nothing here is imported at module load; only when a port is left unset.
@@ -105,6 +123,7 @@ class Harness:
         self.observability = observability
         self.kill_switch = kill_switch
         self.gate = gate or ConfidenceGate()
+        self.side_effect_policy = side_effect_policy or SideEffectPolicy()
 
     # -- public API ------------------------------------------------------
     def invoke(self, agent: Agent, request: AgentInput) -> AgentOutput:
@@ -129,11 +148,13 @@ class Harness:
 
     # -- internals -------------------------------------------------------
     def _run_agent(self, agent: Agent, request: AgentInput) -> tuple[Decision, str | None]:
-        invoker = _BoundInvoker(self, agent.name, request)
+        invoker = _BoundInvoker(self, agent.name, agent.authority_level, request)
         try:
             decision = agent.run(request, invoker)
         except ToolNotAuthorizedError:
             return default_for(FailureMode.TOOL_FAILURE, "unauthorized tool call"), "failure"
+        except SideEffectDeniedError as exc:
+            return default_for(FailureMode.TOOL_FAILURE, f"side-effect denied: {exc.tool_name}"), "failure"
         except Exception as exc:  # any agent/LLM failure resolves safely (spec §8)
             return default_for(FailureMode.BAD_OUTPUT, type(exc).__name__), "failure"
 

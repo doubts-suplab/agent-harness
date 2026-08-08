@@ -17,9 +17,13 @@ class ToolInvoker(Protocol):
 
     ``call`` authorizes against the agent's registry allowlist *before* any side effect (spec §5);
     an unauthorized name raises ``ToolNotAuthorizedError`` and is recorded as a security event.
+
+    For a gated (``write``/``external``) tool, pass ``confidence`` — the harness's side-effect policy
+    (spec §5.3) refuses the call before execution unless it clears the class threshold. Read-only
+    (``none``/``read``) tools ignore ``confidence``.
     """
 
-    def call(self, tool_name: str, arguments: dict[str, Any]) -> Any: ...
+    def call(self, tool_name: str, arguments: dict[str, Any], *, confidence: float | None = None) -> Any: ...
 
 
 @runtime_checkable

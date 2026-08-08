@@ -4,8 +4,8 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg?logo=python&logoColor=white)](pyproject.toml)
 [![Java 21](https://img.shields.io/badge/Java-21-ED8B00.svg?logo=openjdk&logoColor=white)](java/pom.xml)
-[![Tests](https://img.shields.io/badge/tests-Python%2037%20%C2%B7%20Java%2022-brightgreen.svg)](#install--run)
-[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](#status)
+[![Tests](https://img.shields.io/badge/tests-Python%2074%20%C2%B7%20Java%2054-brightgreen.svg)](#install--run)
+[![Orchestration](https://img.shields.io/badge/orchestration-4%20patterns-6f42c1.svg)](docs/spec/harness-protocol.md#6-orchestration-patterns)
 [![Spec](https://img.shields.io/badge/spec-normative-6f42c1.svg)](docs/spec/harness-protocol.md)
 [![Gate bypass](https://img.shields.io/badge/confidence__gate__bypass__total-0-success.svg)](docs/spec/harness-protocol.md#42-observability-requirement)
 [![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](pyproject.toml)
@@ -73,25 +73,29 @@ phase agents** on the harness (Requirements, Architecture, Development, Testing,
 its [reference journey](https://github.com/doubts-suplab/apex-sdlc/blob/main/examples/reference-project/README.md)
 walks one project through every phase offline, with the harness — not the agents — deciding enforcement.
 
-**Roadmap:** the plan for Increments 3–7 — protocol completeness (remaining orchestration patterns +
-side-effect gating), production adapters & observability, adoption (packaging, examples, standalone
-docs), test hardening, and cross-language + formal conformance — is tracked with feasibility ratings in
-[`docs/roadmap.md`](docs/roadmap.md). Increments 3–7 are planned, not started.
+**Increment 3 — Protocol completeness** is now in, in both languages: all four orchestration patterns
+(Pipeline §6.1, Fan-out §6.2, Debate/Consensus §6.4, and Supervisor + Workers §6.3 with a real,
+harness-governed planning turn) plus **side-effect gating** (T-5, §5.3) — the harness refuses ungoverned
+`write`/`external` tool calls before they execute. See [ADR-0011](docs/decisions/ADR-0011-side-effect-gating.md).
+
+**Roadmap:** the plan for Increments 4–7 — production adapters & observability, adoption (packaging,
+examples, standalone docs), test hardening, and cross-language + formal conformance — is tracked with
+feasibility ratings in [`docs/roadmap.md`](docs/roadmap.md). Increments 4–7 are planned, not started.
 
 Specification:
 - [`docs/spec/harness-protocol.md`](docs/spec/harness-protocol.md) — the normative, language-neutral protocol.
 - [`docs/spec/agent-contract.schema.json`](docs/spec/agent-contract.schema.json) — machine-readable Agent Contract schema.
-- [`docs/decisions/`](docs/decisions/) — ADR-0001..0009.
+- [`docs/decisions/`](docs/decisions/) — ADR-0001..0011.
 
 Reference implementation — **Python** (`src/agent_harness/`, 3.11+, framework-free core):
-- `core/` — envelope, authority/decision model, confidence gate, tool registry, harness.
+- `core/` — envelope, authority/decision model, confidence gate, tool registry, side-effect policy, harness.
 - `orchestration/` — Pipeline (§6.1), Fan-out (§6.2), Debate/Consensus (§6.4), Supervisor + Workers. `ports/` — LLM + governance Protocols. `adapters/` — in-memory + LLM stub.
 - `contract.py` — loads/validates Agent Contracts against the schema.
-- `tests/` — 37 tests, 94% coverage, mapping 1:1 to the spec §9 conformance checklist.
+- `tests/` — 74 tests, mapping to the spec §9 conformance checklist.
 
 **Java** binding (`java/`, `com.agentharness:agent-harness-java`, plain Java 21, framework-free) — the
 Java counterpart with the same protocol and §9 checklist, plus an `interop.LegacyAgentAdapter` for the
-aether-grid migration. 22 JUnit tests (`cd java && mvn test`). See [ADR-0009](docs/decisions/ADR-0009-java-binding.md).
+aether-grid migration. 54 JUnit tests (`cd java && mvn test`). See [ADR-0009](docs/decisions/ADR-0009-java-binding.md).
 
 ## Install & run
 
@@ -99,7 +103,7 @@ aether-grid migration. 22 JUnit tests (`cd java && mvn test`). See [ADR-0009](do
 python3 -m venv .venv && source .venv/bin/activate   # Python 3.11+
 pip install -e ".[test]"        # library + test deps
 
-pytest                          # 37 tests, ~94% coverage
+pytest                          # 74 tests, mapping to the §9 conformance checklist
 python examples/quickstart.py   # end-to-end demo
 ```
 

@@ -54,6 +54,12 @@ public final class ToolRegistry {
         return allowlists.getOrDefault(agentName, Set.of());
     }
 
+    /** The declared side-effect class of a tool (spec §5 T-5), or {@code null} if unregistered. */
+    public String sideEffect(String toolName) {
+        RegisteredTool tool = tools.get(toolName);
+        return tool == null ? null : tool.sideEffect();
+    }
+
     /** Authorize (default-deny) then invoke. Unauthorized → ToolNotAuthorizedException (spec §5 T-1/T-2). */
     public Object invoke(String agentName, String toolName, Map<String, Object> arguments) {
         if (!isAuthorized(agentName, toolName)) {

@@ -69,6 +69,11 @@ class ToolRegistry:
     def allowlist(self, agent_name: str) -> frozenset[str]:
         return self._allowlists.get(agent_name, frozenset())
 
+    def side_effect(self, tool_name: str) -> str | None:
+        """The declared side-effect class of a tool (spec §5 T-5), or None if unregistered."""
+        tool = self._tools.get(tool_name)
+        return tool.side_effect if tool is not None else None
+
     def invoke(self, agent_name: str, tool_name: str, arguments: dict[str, Any]) -> Any:
         """Authorize (default-deny) then invoke. Unauthorized → ToolNotAuthorizedError (spec §5 T-1/T-2)."""
         if not self.is_authorized(agent_name, tool_name):
