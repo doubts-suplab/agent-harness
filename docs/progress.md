@@ -137,6 +137,13 @@ adapters live behind the existing port Protocols and are opt-in.
   an engaged switch routes every invocation to human review (`DEFER`, never auto-enforced). Python
   (`adapters/file_kill_switch.py`) + Java (`adapters/FileKillSwitch.java`). Tests:
   `tests/test_file_kill_switch.py` (4) + `FileKillSwitchTest` (4).
+- [x] **Memory + Policy reference adapters (§7).** `MemoryPort` gains an in-memory and a durable
+  file-backed adapter, both **tenant-isolated** by `(tenant_id, user_id, key)` (a scope check rejects
+  empty tenant/user). `PolicyPort` gains an immutable `RuleBasedPolicy` (frozen rules — an agent cannot
+  loosen them at runtime, INV-3): first matching rule wins, else a configurable default; rules load from
+  a durable file. Python (`adapters/memory.py`, `adapters/policy.py`) + Java (`InMemoryMemory`,
+  `FileMemory`, `PolicyPort`, `RuleBasedPolicy`). Tests: `tests/test_memory_policy.py` (13) +
+  `MemoryPolicyTest` (7).
 
 ---
 
