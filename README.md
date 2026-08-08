@@ -1,5 +1,15 @@
 # HALO — agent-harness
 
+[![CI](https://github.com/doubts-suplab/agent-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/doubts-suplab/agent-harness/actions/workflows/ci.yml)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg?logo=python&logoColor=white)](pyproject.toml)
+[![Java 21](https://img.shields.io/badge/Java-21-ED8B00.svg?logo=openjdk&logoColor=white)](java/pom.xml)
+[![Tests](https://img.shields.io/badge/tests-Python%2037%20%C2%B7%20Java%2022-brightgreen.svg)](#install--run)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](#status)
+[![Spec](https://img.shields.io/badge/spec-normative-6f42c1.svg)](docs/spec/harness-protocol.md)
+[![Gate bypass](https://img.shields.io/badge/confidence__gate__bypass__total-0-success.svg)](docs/spec/harness-protocol.md#42-observability-requirement)
+[![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](pyproject.toml)
+
 > **HALO · Harness for Agent Lifecycle & Oversight.** A generic, enterprise-grade agent runtime — a
 > language-neutral harness protocol (typed decision envelope, centralized confidence gate, runtime-enforced
 > tool registry, composable orchestration, pluggable ports) with Python and Java reference implementations.
@@ -12,7 +22,7 @@ an agent uses, and regardless of host language or framework.
 
 HALO is **vendor-neutral**: it depends on no product and imports no product internals. It is a generic
 implementation of the "agent runtime" that the
-[Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/suplab/aether-iel) specifies but does
+[Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/doubts-suplab/aether-iel) specifies but does
 not build. It is a first-class peer of the ecosystem's other platforms — **APEX** (SDLC), **EEIK** (bootstrap
 kit), and **Aether** (cognitive fabric) — and they **consume** it; it consumes nothing from them.
 
