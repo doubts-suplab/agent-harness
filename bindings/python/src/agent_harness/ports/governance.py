@@ -7,7 +7,7 @@ All are Protocols; concrete adapters live at the edge and depend on this core, n
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Protocol, runtime_checkable
 
 from ..core.model import AgentInput, Decision
@@ -58,6 +58,26 @@ class ReviewItem:
     reason: str             # why it was routed (low_confidence | defer | suggest | kill_switch | failure)
     sla_seconds: int
     enqueued_at: datetime
+
+    @property
+    def deadline(self) -> datetime:
+        """When this item breaches its SLA (spec §7.4)."""
+        return self.enqueued_at + timedelta(seconds=self.sla_seconds)
+
+    def is_overdue(self, now: datetime) -> bool:
+        return now > self.deadline
+
+
+@dataclass(frozen=True)
+class OverrideRecord:
+    """A human override of a queued decision — itself auditable (spec §7.4)."""
+
+    review_id: int
+    agent_name: str
+    tenant_id: str
+    reviewer: str
+    outcome: str            # the human's resolution, e.g. "approved" | "rejected" | "amended"
+    resolved_at: datetime
 
 
 @runtime_checkable
