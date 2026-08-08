@@ -85,7 +85,7 @@ Specification:
 
 Reference implementation — **Python** (`src/agent_harness/`, 3.11+, framework-free core):
 - `core/` — envelope, authority/decision model, confidence gate, tool registry, harness.
-- `orchestration/` — Supervisor + Workers. `ports/` — LLM + governance Protocols. `adapters/` — in-memory + LLM stub.
+- `orchestration/` — Pipeline (§6.1) + Supervisor + Workers. `ports/` — LLM + governance Protocols. `adapters/` — in-memory + LLM stub.
 - `contract.py` — loads/validates Agent Contracts against the schema.
 - `tests/` — 37 tests, 94% coverage, mapping 1:1 to the spec §9 conformance checklist.
 

@@ -67,6 +67,21 @@ Python 3.11+ framework-free core, `src/agent_harness/`. 37 tests green, 94% cove
 
 ---
 
+## Increment 3 — Protocol completeness 🚧 (in progress)
+
+Closing the gap between the normative spec (§6 orchestration, T-5 side-effect gating) and the runtime.
+Each pattern is implemented in **both** Python and Java, and every stage/worker still flows through
+`Harness.invoke` — so the confidence gate and tool registry apply individually (O-1) and
+`confidence_gate_bypass_total` stays 0.
+
+- [x] **Sequential Pipeline (§6.1).** `orchestration/pipeline.py` (Python) + `orchestration/Pipeline.java`
+  (Java). Stages run in order; each receives the prior stage's decision in `context["pipeline"]`; the
+  pipeline short-circuits on the first `BLOCK`/`DEFER`. `PipelineResult` exposes `final_action`,
+  ordered `stage_outputs`, `short_circuited_at`, and a `reconciled_action` (safest action seen).
+  Tests: `tests/test_orchestration_pipeline.py` (7) + `OrchestrationTest` pipeline cases (6).
+
+---
+
 ## Planned next — Increments 3–7
 
 Not started. Tracked with feasibility + priority in [`roadmap.md`](roadmap.md):

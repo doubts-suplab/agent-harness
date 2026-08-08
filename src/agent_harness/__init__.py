@@ -29,6 +29,7 @@ from .core.model import (
     reconcile,
 )
 from .core.registry import ToolRegistry
+from .orchestration.pipeline import Pipeline, PipelineResult
 from .orchestration.supervisor import OrchestrationResult, SupervisorWorkers
 
 __version__ = "0.1.0"
@@ -51,6 +52,8 @@ __all__ = [
     "BYPASS_COUNTER",
     "SupervisorWorkers",
     "OrchestrationResult",
+    "Pipeline",
+    "PipelineResult",
     "FailureMode",
     "default_for",
     "HarnessError",
