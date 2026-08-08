@@ -79,6 +79,13 @@ Each pattern is implemented in **both** Python and Java, and every stage/worker 
   pipeline short-circuits on the first `BLOCK`/`DEFER`. `PipelineResult` exposes `final_action`,
   ordered `stage_outputs`, `short_circuited_at`, and a `reconciled_action` (safest action seen).
   Tests: `tests/test_orchestration_pipeline.py` (7) + `OrchestrationTest` pipeline cases (6).
+- [x] **Parallel Fan-out (§6.2).** `orchestration/fanout.py` (Python, `ThreadPoolExecutor`) +
+  `orchestration/FanOut.java` (Java, fixed thread pool). Independent workers run concurrently over the
+  same input; results are collected order-stably and reconciled via the Decision Hierarchy
+  (`FanOutResult`). Concurrency is proven by a barrier test in each language; the reference in-memory
+  adapters are concurrency-safe (Python: bypass counter now incremented under a lock; Java:
+  `CopyOnWriteArrayList` + `ConcurrentHashMap`), so `confidence_gate_bypass_total` accumulates
+  correctly. Tests: `tests/test_orchestration_fanout.py` (6) + `OrchestrationTest` fan-out cases (5).
 
 ---
 
