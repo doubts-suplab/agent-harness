@@ -81,6 +81,81 @@ class OrchestrationTest {
         }
     }
 
+    /** A supervisor that is also a {@link Planner} — selects a subset of workers. */
+    private record StubPlanner(String name, AuthorityLevel authorityLevel, Set<DecisionAction> capabilities,
+                               BiFunction<AgentInput, ToolInvoker, Decision> decide,
+                               java.util.function.BiFunction<AgentInput, List<String>, List<String>> selector)
+            implements Agent, Planner {
+        @Override
+        public Decision decide(AgentInput input, ToolInvoker tools) {
+            return decide.apply(input, tools);
+        }
+
+        @Override
+        public List<String> plan(AgentInput request, List<String> workerNames) {
+            return selector.apply(request, workerNames);
+        }
+    }
+
+    // -- Supervisor + Workers planning turn (§6.3) -------------------------
+    @Test
+    void supervisorPlanningTurnIsGoverned() {
+        Agent sup = fixed("sup", DecisionAction.ALLOW, 0.9);
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.ALLOW, 0.9),
+                fixed("w2", DecisionAction.ALERT, 0.9));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertEquals(3, audit.entries().size()); // supervisor + both workers (O-1)
+        assertEquals("sup", result.supervisorOutput().agentName());
+        assertEquals(0, obs.counter(Harness.BYPASS_COUNTER));
+    }
+
+    @Test
+    void supervisorHaltsDelegationOnBlock() {
+        Agent sup = fixed("sup", DecisionAction.BLOCK, 0.97);
+        List<Agent> workers = List.of(agent("w1",
+                (in, t) -> { throw new AssertionError("worker must not run when supervisor halts"); }));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertTrue(result.halted());
+        assertTrue(result.workerOutputs().isEmpty());
+        assertEquals(DecisionAction.BLOCK, result.reconciledAction());
+    }
+
+    @Test
+    void supervisorPlannerSelectsSubset() {
+        Agent sup = new StubPlanner("sup", AuthorityLevel.BLOCK, ALL,
+                (in, t) -> Decision.propose(DecisionAction.ALLOW, 0.9, "plan"),
+                (in, names) -> List.of("w2"));
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.BLOCK, 0.97),
+                fixed("w2", DecisionAction.ALERT, 0.9));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertEquals(List.of("w2"), result.delegated());
+        assertEquals(Set.of("w2"), result.workerOutputs().keySet());
+        assertEquals(DecisionAction.ALERT, result.reconciledAction()); // w1 (BLOCK) never engaged
+    }
+
+    @Test
+    void supervisorPlanIsConstrainedToRoster() {
+        Agent sup = new StubPlanner("sup", AuthorityLevel.BLOCK, ALL,
+                (in, t) -> Decision.propose(DecisionAction.ALLOW, 0.9, "plan"),
+                (in, names) -> List.of("w1", "ghost"));
+        List<Agent> workers = List.of(fixed("w1", DecisionAction.ALLOW, 0.9));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertEquals(List.of("w1"), result.delegated()); // bogus name filtered out
+    }
+
+    @Test
+    void supervisorDelegatesToAllByDefault() {
+        Agent sup = fixed("sup", DecisionAction.ALLOW, 0.9);
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.ALLOW, 0.9),
+                fixed("w2", DecisionAction.BLOCK, 0.97));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertEquals(Set.of("w1", "w2"), Set.copyOf(result.delegated()));
+        assertEquals(DecisionAction.BLOCK, result.reconciledAction());
+    }
+
     // -- Pipeline (§6.1) ---------------------------------------------------
     @Test
     void pipelineRunsAllStagesInOrder() {

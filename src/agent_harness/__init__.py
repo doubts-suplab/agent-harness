@@ -33,7 +33,7 @@ from .core.registry import ToolRegistry
 from .orchestration.debate import ConsensusRule, Debate, DebateResult
 from .orchestration.fanout import FanOut, FanOutResult
 from .orchestration.pipeline import Pipeline, PipelineResult
-from .orchestration.supervisor import OrchestrationResult, SupervisorWorkers
+from .orchestration.supervisor import OrchestrationResult, Planner, SupervisorWorkers
 
 __version__ = "0.1.0"
 
@@ -56,6 +56,7 @@ __all__ = [
     "BYPASS_COUNTER",
     "SupervisorWorkers",
     "OrchestrationResult",
+    "Planner",
     "Pipeline",
     "PipelineResult",
     "FanOut",

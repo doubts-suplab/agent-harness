@@ -93,6 +93,12 @@ Each pattern is implemented in **both** Python and Java, and every stage/worker 
   never exceeds the strictest action any participant proposed, nor the strictest participant's authority.
   Added a public `action_precedence`/`Decisions.actionPrecedence` accessor for the §3.3 hierarchy.
   Tests: `tests/test_orchestration_debate.py` (8) + `OrchestrationTest` debate cases (7).
+- [x] **Supervisor + Workers — real planning turn (§6.3).** The supervisor is now invoked *through the
+  harness* (governed, tool-less): its planning decision passes the gate/kill-switch/audit (O-1), and a
+  `BLOCK`/`DEFER` decision **halts delegation** before any worker runs. An optional `Planner` interface
+  lets a supervisor select a subset of workers (constrained to the real roster); a plain supervisor
+  delegates to all. `OrchestrationResult` gained `supervisor_output`, `delegated`, and `halted`.
+  Tests: `tests/test_orchestration_supervisor.py` (6) + `OrchestrationTest` supervisor cases (5).
 
 ---
 
