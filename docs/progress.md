@@ -86,6 +86,13 @@ Each pattern is implemented in **both** Python and Java, and every stage/worker 
   adapters are concurrency-safe (Python: bypass counter now incremented under a lock; Java:
   `CopyOnWriteArrayList` + `ConcurrentHashMap`), so `confidence_gate_bypass_total` accumulates
   correctly. Tests: `tests/test_orchestration_fanout.py` (6) + `OrchestrationTest` fan-out cases (5).
+- [x] **Debate / Consensus (§6.4).** `orchestration/debate.py` (Python) + `orchestration/Debate.java`
+  (Java). Competing agents produce decisions reconciled by a `ConsensusRule`: `SAFEST` (default —
+  strictest action wins per the hierarchy) or `MAJORITY` (plurality; tie → `DEFER`/human review, and
+  may de-escalate below the strictest proposal). The **safety floor** is enforced and tested: consensus
+  never exceeds the strictest action any participant proposed, nor the strictest participant's authority.
+  Added a public `action_precedence`/`Decisions.actionPrecedence` accessor for the §3.3 hierarchy.
+  Tests: `tests/test_orchestration_debate.py` (8) + `OrchestrationTest` debate cases (7).
 
 ---
 

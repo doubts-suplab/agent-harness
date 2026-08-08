@@ -24,11 +24,13 @@ from .core.model import (
     AuthorityLevel,
     Decision,
     DecisionAction,
+    action_precedence,
     action_within_authority,
     min_authority_for,
     reconcile,
 )
 from .core.registry import ToolRegistry
+from .orchestration.debate import ConsensusRule, Debate, DebateResult
 from .orchestration.fanout import FanOut, FanOutResult
 from .orchestration.pipeline import Pipeline, PipelineResult
 from .orchestration.supervisor import OrchestrationResult, SupervisorWorkers
@@ -44,6 +46,7 @@ __all__ = [
     "DecisionAction",
     "AuthorityLevel",
     "action_within_authority",
+    "action_precedence",
     "min_authority_for",
     "reconcile",
     "ConfidenceGate",
@@ -57,6 +60,9 @@ __all__ = [
     "PipelineResult",
     "FanOut",
     "FanOutResult",
+    "Debate",
+    "DebateResult",
+    "ConsensusRule",
     "FailureMode",
     "default_for",
     "HarnessError",

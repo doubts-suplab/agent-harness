@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .debate import Debate, DebateResult, ConsensusRule
 from .fanout import FanOut, FanOutResult
 from .pipeline import Pipeline, PipelineResult
 from .supervisor import OrchestrationResult, SupervisorWorkers
@@ -13,4 +14,7 @@ __all__ = [
     "PipelineResult",
     "FanOut",
     "FanOutResult",
+    "Debate",
+    "DebateResult",
+    "ConsensusRule",
 ]

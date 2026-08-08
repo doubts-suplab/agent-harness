@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -207,5 +208,75 @@ class OrchestrationTest {
     @Test
     void fanOutRequiresAtLeastOneWorker() {
         assertThrows(IllegalArgumentException.class, () -> new FanOut(harness, List.of()));
+    }
+
+    // -- Debate / Consensus (§6.4) -----------------------------------------
+    @Test
+    void debateDefaultRuleIsSafest() {
+        Debate debate = new Debate(harness, List.of(fixed("a", DecisionAction.ALLOW, 0.9)));
+        assertEquals(ConsensusRule.SAFEST, debate.run(REQ).rule());
+    }
+
+    @Test
+    void debateSafestRuleStrictestActionWins() {
+        List<Agent> participants = List.of(
+                fixed("a", DecisionAction.ALLOW, 0.9),
+                fixed("b", DecisionAction.ALLOW, 0.9),
+                fixed("c", DecisionAction.BLOCK, 0.97));
+        DebateResult result = new Debate(harness, participants, ConsensusRule.SAFEST).run(REQ);
+        assertEquals(DecisionAction.BLOCK, result.consensusAction()); // one BLOCK beats two ALLOWs
+        assertFalse(result.tie());
+    }
+
+    @Test
+    void debateMajorityRulePluralityWinsAndMayDeescalate() {
+        List<Agent> participants = List.of(
+                fixed("a", DecisionAction.ALLOW, 0.9),
+                fixed("b", DecisionAction.ALLOW, 0.9),
+                fixed("c", DecisionAction.BLOCK, 0.97));
+        DebateResult result = new Debate(harness, participants, ConsensusRule.MAJORITY).run(REQ);
+        assertEquals(DecisionAction.ALLOW, result.consensusAction()); // majority de-escalates
+        assertFalse(result.tie());
+    }
+
+    @Test
+    void debateMajorityTieResolvesToDefer() {
+        List<Agent> participants = List.of(
+                fixed("a", DecisionAction.ALLOW, 0.9),
+                fixed("b", DecisionAction.BLOCK, 0.97));
+        DebateResult result = new Debate(harness, participants, ConsensusRule.MAJORITY).run(REQ);
+        assertEquals(DecisionAction.DEFER, result.consensusAction()); // tie -> human review
+        assertTrue(result.tie());
+    }
+
+    @Test
+    void debateConsensusNeverExceedsStrictestParticipant() {
+        for (ConsensusRule rule : ConsensusRule.values()) {
+            setUp();
+            List<Agent> participants = List.of(
+                    fixed("a", AuthorityLevel.OBSERVE, DecisionAction.ALLOW, 0.9),
+                    fixed("b", AuthorityLevel.ALERT, DecisionAction.ALERT, 0.9),
+                    fixed("c", AuthorityLevel.OBSERVE, DecisionAction.ALLOW, 0.9));
+            DebateResult result = new Debate(harness, participants, rule).run(REQ);
+            DecisionAction strictest = com.agentharness.model.Decisions.reconcile(
+                    result.participantOutputs().values().stream().map(o -> o.decision().action()).toList());
+            assertTrue(com.agentharness.model.Decisions.actionPrecedence(result.consensusAction())
+                    <= com.agentharness.model.Decisions.actionPrecedence(strictest));
+        }
+    }
+
+    @Test
+    void debateEachParticipantPassesGateBypassZero() {
+        List<Agent> participants = List.of(
+                fixed("a", DecisionAction.BLOCK, 0.97),
+                fixed("b", DecisionAction.ALERT, 0.9));
+        new Debate(harness, participants).run(REQ);
+        assertEquals(0, obs.counter(Harness.BYPASS_COUNTER));
+        assertEquals(2, audit.entries().size()); // O-1: each participant went through the harness
+    }
+
+    @Test
+    void debateRequiresAtLeastOneParticipant() {
+        assertThrows(IllegalArgumentException.class, () -> new Debate(harness, List.of()));
     }
 }
