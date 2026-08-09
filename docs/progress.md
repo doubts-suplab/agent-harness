@@ -150,6 +150,15 @@ adapters live behind the existing port Protocols and are opt-in.
   audit adapters (`InMemoryAudit`, `FileAudit`) accept a custom strategy. The default `redact` free
   function is preserved. Python (`adapters/redaction.py`) + Java (`adapters/RedactionStrategy.java`,
   `Redaction` now a thin facade). Tests: `tests/test_redaction.py` (5) + `RedactionStrategyTest` (4).
+- [x] **Production `LlmPort` providers (§7).** One flexible **OpenAI-compatible HTTP adapter**
+  (`OpenAICompatibleLlm`) plus a **preset registry** (`PROVIDERS`: OpenAI, Groq, Ollama, Gemini's
+  OpenAI-compat endpoint, Sarvam AI) — adding a compatible provider is config, not code
+  (`openai_compatible("groq")`). A **native `AnthropicLlm`** covers the Anthropic Messages API
+  (top-level system, `input_schema` tools, `text`/`tool_use` blocks). stdlib-only (`urllib`), keys from
+  env, lazily usable, and **offline-tested via an injected transport**; streaming is deferred (ADR
+  roadmap note). Python (`adapters/llm_http.py`, `adapters/llm_anthropic.py`). Tests:
+  `tests/test_llm_providers.py` (9). *(Python-only this cycle; Java native HTTP LLM adapters are a
+  follow-up — the Java binding keeps `StubLlm`.)*
 
 ---
 

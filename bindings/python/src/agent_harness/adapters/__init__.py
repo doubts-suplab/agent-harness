@@ -12,6 +12,8 @@ from .inmemory import (
 )
 from .file_audit import FileAudit
 from .file_kill_switch import FileKillSwitch
+from .llm_anthropic import AnthropicLlm
+from .llm_http import PROVIDERS, LlmError, OpenAICompatibleLlm, ProviderPreset, openai_compatible
 from .llm_stub import StubLlm
 from .memory import FileMemory, InMemoryMemory
 from .policy import PolicyRule, RuleBasedPolicy, load_policy
@@ -36,6 +38,12 @@ __all__ = [
     "RuleBasedPolicy",
     "load_policy",
     "StubLlm",
+    "OpenAICompatibleLlm",
+    "openai_compatible",
+    "ProviderPreset",
+    "PROVIDERS",
+    "AnthropicLlm",
+    "LlmError",
     "SlaMonitor",
     "HUMAN_REVIEW_SLA_BREACH",
 ]
