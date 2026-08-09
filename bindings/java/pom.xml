@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.agentharness</groupId>
-  <artifactId>agent-harness-java</artifactId>
+  <groupId>com.suplab.agentharness</groupId>
+  <artifactId>halo-agent-harness</artifactId>
   <version>0.1.0</version>
   <packaging>jar</packaging>
 
-  <name>agent-harness (Java binding)</name>
+  <name>halo-agent-harness (Java binding)</name>
   <description>
     Java binding of the agent-harness protocol (docs/spec/harness-protocol.md): typed decision envelope,
     centralized non-disableable confidence gate, default-deny tool registry, orchestration, and pluggable
@@ -45,7 +45,7 @@
   </properties>
 
   <!-- Published to GitHub Packages by .github/workflows/publish-java.yml on a GitHub Release.
-       Consumers (e.g. aether-grid) resolve com.agentharness:agent-harness-java from this repository
+       Consumers (e.g. aether-grid) resolve com.suplab.agentharness:halo-agent-harness from this repository
        (requires a token with read:packages in their Maven settings). -->
   <distributionManagement>
     <repository>
