@@ -12,8 +12,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from agent_harness.contract import load_contract, validate_contract
-from agent_harness.core.errors import ContractValidationError
+from halo_agent_harness.contract import load_contract, validate_contract
+from halo_agent_harness.core.errors import ContractValidationError
 
 # examples/ -> bindings/python -> bindings -> repo root
 _EXAMPLES = Path(__file__).resolve().parents[3] / "docs" / "spec" / "examples"

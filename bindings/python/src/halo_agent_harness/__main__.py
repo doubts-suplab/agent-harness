@@ -1,4 +1,4 @@
-"""Enable ``python -m agent_harness`` to invoke the CLI."""
+"""Enable ``python -m halo_agent_harness`` to invoke the CLI."""
 
 from __future__ import annotations
 

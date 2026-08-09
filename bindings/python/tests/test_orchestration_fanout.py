@@ -6,7 +6,7 @@ import threading
 
 import pytest
 
-from agent_harness import (
+from halo_agent_harness import (
     AuthorityLevel,
     BYPASS_COUNTER,
     Decision,

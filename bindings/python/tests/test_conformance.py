@@ -6,7 +6,7 @@ from datetime import timezone
 
 import pytest
 
-from agent_harness import (
+from halo_agent_harness import (
     AgentInput,
     AuthorityLevel,
     BYPASS_COUNTER,
@@ -33,7 +33,7 @@ def test_envelope_roundtrip(rig, request_):
 
 @pytest.mark.parametrize("tenant,user", [("", "u"), ("t", ""), ("", "")])
 def test_unscoped_invocation_is_rejected_not_defaulted(rig, tenant, user):
-    from agent_harness import UnscopedInvocationError
+    from halo_agent_harness import UnscopedInvocationError
     agent = FakeAgent("a", AuthorityLevel.OBSERVE, frozenset({DecisionAction.ALLOW}),
                       static_decision(DecisionAction.ALLOW, 0.9))
     with pytest.raises(UnscopedInvocationError):

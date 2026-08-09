@@ -2,42 +2,42 @@
 
 ## Core — envelope, model, gate, registry, harness
 
-::: agent_harness.core.model
+::: halo_agent_harness.core.model
 
-::: agent_harness.core.gate
+::: halo_agent_harness.core.gate
 
-::: agent_harness.core.registry
+::: halo_agent_harness.core.registry
 
-::: agent_harness.core.side_effect
+::: halo_agent_harness.core.side_effect
 
-::: agent_harness.core.harness
+::: halo_agent_harness.core.harness
 
-::: agent_harness.core.failure
+::: halo_agent_harness.core.failure
 
 ## Orchestration (spec §6)
 
-::: agent_harness.orchestration.pipeline
+::: halo_agent_harness.orchestration.pipeline
 
-::: agent_harness.orchestration.fanout
+::: halo_agent_harness.orchestration.fanout
 
-::: agent_harness.orchestration.debate
+::: halo_agent_harness.orchestration.debate
 
-::: agent_harness.orchestration.supervisor
+::: halo_agent_harness.orchestration.supervisor
 
 ## Ports (spec §7)
 
-::: agent_harness.ports.governance
+::: halo_agent_harness.ports.governance
 
-::: agent_harness.ports.llm
+::: halo_agent_harness.ports.llm
 
 ## Contract loading (spec §10)
 
-::: agent_harness.contract
+::: halo_agent_harness.contract
 
 ## Reference adapters
 
-::: agent_harness.adapters.sla
+::: halo_agent_harness.adapters.sla
 
-::: agent_harness.adapters.redaction
+::: halo_agent_harness.adapters.redaction
 
-::: agent_harness.adapters.policy
+::: halo_agent_harness.adapters.policy

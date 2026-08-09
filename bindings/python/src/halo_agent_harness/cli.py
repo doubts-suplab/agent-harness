@@ -2,7 +2,7 @@
 
 Currently exposes ``halo validate-contract <path.json>`` — validating an Agent Contract against
 ``docs/spec/agent-contract.schema.json`` and the semantic binding rule (spec §3.3, §10). Installed as
-the ``halo`` console script (see ``[project.scripts]``); also runnable as ``python -m agent_harness``.
+the ``halo`` console script (see ``[project.scripts]``); also runnable as ``python -m halo_agent_harness``.
 """
 
 from __future__ import annotations

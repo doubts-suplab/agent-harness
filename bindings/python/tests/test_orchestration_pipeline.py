@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from agent_harness import (
+from halo_agent_harness import (
     AuthorityLevel,
     BYPASS_COUNTER,
     Decision,

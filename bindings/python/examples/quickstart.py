@@ -12,15 +12,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from agent_harness import (
+from halo_agent_harness import (
     AgentInput,
     AuthorityLevel,
     Decision,
     DecisionAction,
     Harness,
 )
-from agent_harness.adapters import InMemoryAudit, InMemoryHumanReview, InMemoryObservability
-from agent_harness.core.agent import ToolInvoker
+from halo_agent_harness.adapters import InMemoryAudit, InMemoryHumanReview, InMemoryObservability
+from halo_agent_harness.core.agent import ToolInvoker
 
 
 @dataclass

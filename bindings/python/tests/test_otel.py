@@ -12,9 +12,9 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
-from agent_harness import AgentInput, AuthorityLevel, BYPASS_COUNTER, DecisionAction, Harness
-from agent_harness.adapters.otel import OtelObservability
-from agent_harness.ports.governance import InvocationMetric
+from halo_agent_harness import AgentInput, AuthorityLevel, BYPASS_COUNTER, DecisionAction, Harness
+from halo_agent_harness.adapters.otel import OtelObservability
+from halo_agent_harness.ports.governance import InvocationMetric
 from conftest import FakeAgent, static_decision
 
 

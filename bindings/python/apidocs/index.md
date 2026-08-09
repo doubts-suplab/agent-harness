@@ -1,6 +1,6 @@
 # HALO — Python API reference
 
-Generated reference for the **Python binding** of the HALO harness protocol (`agent_harness`). For the
+Generated reference for the **Python binding** of the HALO harness protocol (`halo_agent_harness`). For the
 project overview, the normative protocol, and the decision records, start at the
 [repository root](https://github.com/doubts-suplab/agent-harness).
 
@@ -11,7 +11,7 @@ project overview, the normative protocol, and the decision records, start at the
 ## Quickstart
 
 ```python
-from agent_harness import AgentInput, AuthorityLevel, Decision, DecisionAction, Harness
+from halo_agent_harness import AgentInput, AuthorityLevel, Decision, DecisionAction, Harness
 
 
 class RefundApprover:

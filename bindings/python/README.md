@@ -1,4 +1,4 @@
-# HALO — Python binding (`agent_harness`)
+# HALO — Python binding (`halo_agent_harness`)
 
 The **Python reference implementation** of the HALO harness protocol (`agent-harness`). This is one
 conforming binding of a language-neutral spec; the Java binding lives in
@@ -20,7 +20,7 @@ python examples/quickstart.py   # end-to-end demo
 ```
 
 ```python
-from agent_harness import AgentInput, Harness      # zero-config: in-memory adapters by default
+from halo_agent_harness import AgentInput, Harness      # zero-config: in-memory adapters by default
 out = Harness().invoke(my_agent, AgentInput("tenant", "user", context={...}))
 # out.decision.auto_enforced was decided by the harness gate — never by the agent
 ```

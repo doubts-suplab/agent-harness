@@ -7,7 +7,7 @@ from typing import Callable
 
 import pytest
 
-from agent_harness import (
+from halo_agent_harness import (
     Agent,
     AgentInput,
     AuthorityLevel,
@@ -17,13 +17,13 @@ from agent_harness import (
     Harness,
     ToolRegistry,
 )
-from agent_harness.adapters import (
+from halo_agent_harness.adapters import (
     InMemoryAudit,
     InMemoryHumanReview,
     InMemoryKillSwitch,
     InMemoryObservability,
 )
-from agent_harness.core.agent import ToolInvoker
+from halo_agent_harness.core.agent import ToolInvoker
 
 
 @dataclass

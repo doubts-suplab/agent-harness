@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from agent_harness.adapters import (
+from halo_agent_harness.adapters import (
     DEFAULT_STRATEGY,
     InMemoryAudit,
     RedactionStrategy,
     redact,
 )
-from agent_harness.ports.governance import AuditEntry
+from halo_agent_harness.ports.governance import AuditEntry
 
 _NOW = datetime(2026, 8, 8, tzinfo=timezone.utc)
 

@@ -3,7 +3,7 @@
 Most modern providers speak the OpenAI chat-completions wire format, so a single adapter parameterised
 by ``base_url`` covers OpenAI, Groq, Ollama, Gemini (its OpenAI-compat endpoint) and Sarvam AI — adding
 a compatible provider is *config, not code* (see :data:`PROVIDERS`). Anthropic is not OpenAI-compatible
-natively; use :mod:`agent_harness.adapters.llm_anthropic`.
+natively; use :mod:`halo_agent_harness.adapters.llm_anthropic`.
 
 The default transport is an async ``httpx`` client (install the ``llm`` extra:
 ``pip install "agent-harness[llm]"``); ``httpx`` is imported lazily, so merely importing this module

@@ -1,7 +1,7 @@
 """INV-5 (spec §7): the core imports nothing third-party.
 
 Scans the top-level imports of every module under core/, ports/, and orchestration/ and asserts each
-resolves to the standard library or to agent_harness itself. Relative imports are always allowed.
+resolves to the standard library or to halo_agent_harness itself. Relative imports are always allowed.
 """
 
 from __future__ import annotations
@@ -10,10 +10,10 @@ import ast
 import sys
 from pathlib import Path
 
-PKG = Path(__file__).resolve().parents[1] / "src" / "agent_harness"
+PKG = Path(__file__).resolve().parents[1] / "src" / "halo_agent_harness"
 FRAMEWORK_FREE_DIRS = ["core", "ports", "orchestration"]
 STDLIB = set(sys.stdlib_module_names)
-ALLOWED_FIRST_PARTY = {"agent_harness"}
+ALLOWED_FIRST_PARTY = {"halo_agent_harness"}
 
 
 def _top_level_imports(path: Path) -> set[str]:

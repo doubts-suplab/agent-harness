@@ -8,7 +8,7 @@ from typing import Callable
 
 import pytest
 
-from agent_harness import (
+from halo_agent_harness import (
     AgentInput,
     AuthorityLevel,
     BYPASS_COUNTER,
@@ -16,7 +16,7 @@ from agent_harness import (
     DecisionAction,
     SupervisorWorkers,
 )
-from agent_harness.core.agent import ToolInvoker
+from halo_agent_harness.core.agent import ToolInvoker
 from conftest import FakeAgent, static_decision
 
 _ALL = frozenset(

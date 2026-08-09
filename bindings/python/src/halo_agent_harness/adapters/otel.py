@@ -4,7 +4,7 @@ Maps each per-invocation metric to an OTel **span** (agent, action, confidence, 
 correlation id) *and* to OTel **metrics** (an invocations counter + a duration histogram), and mirrors
 harness counters — including ``confidence_gate_bypass_total`` — as OTel counters.
 
-This adapter is **optional**: it is deliberately NOT imported by ``agent_harness.adapters``, so the
+This adapter is **optional**: it is deliberately NOT imported by ``halo_agent_harness.adapters``, so the
 OpenTelemetry SDK is only required when you import this module. Install it with the ``otel`` extra
 (``pip install "agent-harness[otel]"``). Wire it with ``Harness(observability=OtelObservability(...))``.
 """
@@ -28,8 +28,8 @@ class OtelObservability:
         # Imported here so merely importing this module does not require the OTel SDK to be installed.
         from opentelemetry import metrics, trace
 
-        self._tracer = tracer or trace.get_tracer("agent_harness")
-        self._meter = meter or metrics.get_meter("agent_harness")
+        self._tracer = tracer or trace.get_tracer("halo_agent_harness")
+        self._meter = meter or metrics.get_meter("halo_agent_harness")
         self._span_name = span_name
         self._invocations = self._meter.create_counter(_INVOCATIONS)
         self._duration = self._meter.create_histogram(_DURATION)
