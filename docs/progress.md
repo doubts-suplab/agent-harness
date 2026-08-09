@@ -160,6 +160,15 @@ adapters live behind the existing port Protocols and are opt-in.
   `adapters/llm_anthropic.py`). Tests:
   `tests/test_llm_providers.py` (9). *(Python-only this cycle; Java native HTTP LLM adapters are a
   follow-up — the Java binding keeps `StubLlm`.)*
+- [x] **OpenTelemetry `ObservabilityPort` exporter (§7.5, §4.2).** `OtelObservability` maps each
+  per-invocation metric to an OTel **span** (agent, action, confidence, duration, outcome, correlation
+  id) and to **metrics** (`agent_invocations_total` counter + `agent_invocation_duration_ms` histogram),
+  and mirrors harness counters — including `confidence_gate_bypass_total` — as OTel counters. It is an
+  **optional** adapter (the `otel` extra: `opentelemetry-sdk`), deliberately *not* imported by
+  `agent_harness.adapters`, so the SDK is only needed when you import it. Offline-tested with the OTel
+  SDK's in-memory span exporter + metric reader, including an end-to-end `Harness` wiring. Python-only
+  (`adapters/otel.py`); Java OTel would need a separate optional Maven module (deferred). Tests:
+  `tests/test_otel.py` (4).
 
 ---
 
