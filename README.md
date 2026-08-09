@@ -8,6 +8,7 @@
 [![Orchestration](https://img.shields.io/badge/orchestration-4%20patterns-6f42c1.svg)](docs/spec/harness-protocol.md#6-orchestration-patterns)
 [![Spec](https://img.shields.io/badge/spec-normative-6f42c1.svg)](docs/spec/harness-protocol.md)
 [![Gate bypass](https://img.shields.io/badge/confidence__gate__bypass__total-0-success.svg)](docs/spec/harness-protocol.md#42-observability-requirement)
+
 [![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](CHANGELOG.md)
 
 > **HALO · Harness for Agent Lifecycle & Oversight.** A vendor-neutral runtime that governs what your AI
