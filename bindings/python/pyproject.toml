@@ -21,6 +21,9 @@ llm = ["httpx>=0.24"]   # only the production LLM providers need this (OpenAI-co
 otel = ["opentelemetry-sdk>=1.20"]   # only the OpenTelemetry observability adapter needs this
 test = ["pytest>=8.0", "pytest-cov>=5.0", "jsonschema>=4.20", "opentelemetry-sdk>=1.20"]
 
+[project.scripts]
+halo = "agent_harness.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/doubts-suplab/agent-harness"
 Specification = "https://github.com/doubts-suplab/agent-harness/blob/main/docs/spec/harness-protocol.md"

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0",
+  "identity": {
+    "agentName": "observe-monitor",
+    "agentClass": "ObserveMonitorAgent",
+    "capabilityEnum": "OBSERVABILITY",
+    "ownerService": "example-consumer",
+    "version": "1.0.0"
+  },
+  "purpose": "A read-only monitor that observes activity and either lets it pass or defers to a human. It holds the lowest authority (OBSERVE) and can never block or alert — a worked example of a minimal, non-enforcing contract.",
+  "authorityLevel": "OBSERVE",
+  "capabilities": ["ALLOW", "DEFER"],
+  "confidenceGate": {
+    "threshold": 0.8,
+    "escalationPath": "observability-human-review-queue"
+  },
+  "toolAccess": [
+    { "tool": "MetricsStore", "permission": "Read", "purpose": "Read recent activity metrics", "sideEffect": "read" }
+  ],
+  "inputContract": {
+    "tenantScoped": true,
+    "requiredContextKeys": ["event"]
+  },
+  "outputContract": {
+    "emitsDecision": true,
+    "rationaleAlwaysPresent": true
+  },
+  "fastPathConditions": [
+    { "when": "Event matches a known-safe pattern", "action": "ALLOW", "confidence": 0.9 }
+  ],
+  "failureBehaviour": [
+    { "failure": "Metrics store timeout", "action": "DEFER", "confidence": 0.6, "autoEnforced": false }
+  ],
+  "testingRequirements": [
+    "fast-path: known-safe event -> ALLOW",
+    "unknown event -> DEFER",
+    "capability-declaration: never emits BLOCK/ALERT (out of authority)"
+  ],
+  "governance": {
+    "signoff": [
+      { "role": "Agent Engineer" }
+    ]
+  }
+}

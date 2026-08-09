@@ -170,6 +170,30 @@ adapters live behind the existing port Protocols and are opt-in.
   (`adapters/otel.py`); Java OTel would need a separate optional Maven module (deferred). Tests:
   `tests/test_otel.py` (4).
 
+> **Increment 4 status:** all deliverables except the Prometheus/Grafana metrics dashboard are in
+> (that item is deferred). Suite after Increment 4: **Python 121**, **Java 80**.
+
+---
+
+## Increment 5 — Adoption: packaging, examples, standalone docs 🚧 (in progress)
+
+Lowering the barrier for someone outside the Aether family to evaluate and adopt HALO.
+
+- [x] **Standalone README + comparison table.** The README (and `docs/index.html` mirror) now leads with
+  *the problem* (agents that act need a governance layer teams otherwise hand-roll), a minimal
+  ecosystem-free example, and a **comparison table** vs LangChain/LangGraph, CrewAI, AutoGen, and a raw
+  SDK (framed as complementary — governance vs orchestration). The Aether ecosystem is pushed below the
+  fold.
+- [x] **CHANGELOG.md + versioning/stability policy.** Keep a Changelog format grouped by increment, with
+  an explicit `0.x` policy: the protocol may still change pre-1.0, but the safety invariants never weaken;
+  1.0 follows a frozen protocol + conformance suite.
+- [x] **AGPL-3.0 implications callout + `LICENSING.md`.** A plain-language "what AGPL means if you build
+  on HALO" guide (network/§13 copyleft, options, not-legal-advice disclaimer). License unchanged.
+- [x] **Agent Contract validation CLI.** `halo validate-contract <path.json>...` (console script +
+  `python -m agent_harness`) validates against the schema + binding rule (spec §3.3, §10), with batch
+  support and meaningful exit codes (0 valid / 1 invalid / 2 missing). Added two more worked contract
+  examples (`observe-monitor`, `advisory-reviewer`). Tests: `tests/test_cli.py` (5).
+
 ---
 
 ## Planned next — Increments 4–7
