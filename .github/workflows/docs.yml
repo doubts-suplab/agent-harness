@@ -1,0 +1,60 @@
+name: API docs
+
+# Builds the reference docs — MkDocs (Python) + Javadoc (Java) — on every push/PR (validates they build),
+# and deploys them to GitHub Pages on main / manual dispatch. Deployment is GATED on Pages being enabled
+# for the repo (Settings → Pages → Source: GitHub Actions); until then the build job still runs.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Build Python API docs (MkDocs)
+        run: |
+          pip install -e ".[docs]"
+          mkdocs build --site-dir "$GITHUB_WORKSPACE/public"
+        working-directory: bindings/python
+      - name: Build Java API docs (Javadoc)
+        run: mvn -B -ntp javadoc:javadoc
+        working-directory: bindings/java
+      - name: Assemble site
+        run: |
+          mkdir -p public/javadoc
+          cp -r bindings/java/target/reports/apidocs/* public/javadoc/
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

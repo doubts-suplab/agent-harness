@@ -214,6 +214,15 @@ Lowering the barrier for someone outside the Aether family to evaluate and adopt
   (url/licenses/developers/scm) added; the `release` profile is inactive by default, so `mvn test` is
   unaffected. Verified the Python wheel + sdist build cleanly (incl. the `halo` entry point). Gates
   documented in [`publishing.md`](publishing.md).
+- [x] **Public API docs (MkDocs + Javadoc).** Python reference site via MkDocs Material + mkdocstrings
+  (`bindings/python/mkdocs.yml` + `apidocs/`, `docs` extra); Java reference via `mvn javadoc:javadoc`.
+  A `docs.yml` workflow builds both on every push/PR and deploys the combined site (MkDocs at root,
+  Javadoc under `/javadoc`) to GitHub Pages on `main` (deploy gated on Pages being enabled). Both builds
+  verified locally.
+
+> **Increment 5 status:** all deliverables in — standalone README + comparison table, CHANGELOG +
+> stability policy, AGPL LICENSING.md, contract-validation CLI + more examples, and API docs — plus the
+> PyPI/Maven Central publish workflows (⧗ gated on credentials). Suite: **Python 131**, **Java 81**.
 
 ---
 
