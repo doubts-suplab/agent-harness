@@ -198,6 +198,13 @@ Lowering the barrier for someone outside the Aether family to evaluate and adopt
   `failure_modes` (agent raises / unauthorized tool / low confidence / kill switch — all resolve to safe
   defaults). Each Python example has a smoke test (`tests/test_examples.py`, 5) so they can't bit-rot; a
   Java `OrchestrationExample` mirrors the orchestration walk-through with its own smoke test.
+- [x] **PyPI + Maven Central publish workflows (⧗ external).** Wired but gated on org credentials.
+  `publish-python.yml` builds + publishes to PyPI via **Trusted Publishing** (OIDC, no stored token);
+  `publish-maven-central.yml` deploys the Java binding via a new pom `release` profile (sources + javadoc +
+  GPG sign + Central Publishing plugin, `autoPublish=false` → staged). Central-required pom metadata
+  (url/licenses/developers/scm) added; the `release` profile is inactive by default, so `mvn test` is
+  unaffected. Verified the Python wheel + sdist build cleanly (incl. the `halo` entry point). Gates
+  documented in [`publishing.md`](publishing.md).
 
 ---
 

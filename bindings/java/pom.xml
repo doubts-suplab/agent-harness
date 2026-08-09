@@ -15,6 +15,28 @@
     centralized non-disableable confidence gate, default-deny tool registry, orchestration, and pluggable
     ports. Framework-free (plain Java 21, no Spring). Brand-neutral.
   </description>
+  <url>https://github.com/doubts-suplab/agent-harness</url>
+
+  <!-- Metadata below is required by Maven Central; inert for the normal build/test cycle. -->
+  <licenses>
+    <license>
+      <name>GNU Affero General Public License v3.0</name>
+      <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>doubts-suplab</id>
+      <name>doubts-suplab</name>
+      <url>https://github.com/doubts-suplab</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/doubts-suplab/agent-harness.git</connection>
+    <developerConnection>scm:git:git@github.com:doubts-suplab/agent-harness.git</developerConnection>
+    <url>https://github.com/doubts-suplab/agent-harness</url>
+  </scm>
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
@@ -71,4 +93,62 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- Maven Central release. Activated only by `mvn -Prelease deploy` (see
+         .github/workflows/publish-maven-central.yml); the normal build/test cycle never touches it.
+         Requires CENTRAL_TOKEN_* + a GPG signing key at deploy time (gated on org credentials). -->
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.3.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals><goal>jar-no-fork</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.7.0</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals><goal>jar</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals><goal>sign</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.5.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <!-- Leave staged for a human to release in the Central portal, rather than auto-publishing. -->
+              <autoPublish>false</autoPublish>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
