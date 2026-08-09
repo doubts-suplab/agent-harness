@@ -4,103 +4,122 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg?logo=python&logoColor=white)](bindings/python/pyproject.toml)
 [![Java 21](https://img.shields.io/badge/Java-21-ED8B00.svg?logo=openjdk&logoColor=white)](bindings/java/pom.xml)
-[![Tests](https://img.shields.io/badge/tests-Python%2074%20%C2%B7%20Java%2054-brightgreen.svg)](#install--run)
+[![Tests](https://img.shields.io/badge/tests-Python%20121%20%C2%B7%20Java%2080-brightgreen.svg)](#install--run)
 [![Orchestration](https://img.shields.io/badge/orchestration-4%20patterns-6f42c1.svg)](docs/spec/harness-protocol.md#6-orchestration-patterns)
 [![Spec](https://img.shields.io/badge/spec-normative-6f42c1.svg)](docs/spec/harness-protocol.md)
 [![Gate bypass](https://img.shields.io/badge/confidence__gate__bypass__total-0-success.svg)](docs/spec/harness-protocol.md#42-observability-requirement)
-[![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](bindings/python/pyproject.toml)
+[![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](CHANGELOG.md)
 
-> **HALO · Harness for Agent Lifecycle & Oversight.** A generic, enterprise-grade agent runtime — a
-> language-neutral harness protocol (typed decision envelope, centralized confidence gate, runtime-enforced
-> tool registry, composable orchestration, pluggable ports) with Python and Java reference implementations.
-> The repo and coordinates stay `agent-harness` / `com.agentharness`; **HALO** is its product identity.
-
-**HALO** is the runtime that stands between an agent's decision logic and the outside world — a *halo* of
-oversight (gate, audit, human review, kill switch) around every agent decision. Its job is to make agent
-execution **safe, governed, observable, and reproducible** — regardless of which LLM, memory store, or tools
-an agent uses, and regardless of host language or framework.
-
-HALO is **vendor-neutral**: it depends on no product and imports no product internals. It is a generic
-implementation of the "agent runtime" that the
-[Aether Intelligence Engineering Lifecycle (AIEL)](https://github.com/doubts-suplab/aether-iel) specifies but does
-not build. It is a first-class peer of the ecosystem's other platforms — **APEX** (SDLC), **EEIK** (bootstrap
-kit), and **Aether** (cognitive fabric) — and they **consume** it; it consumes nothing from them.
-
-> **Ecosystem**
->
-> | Platform | Repo | Role |
-> |---|---|---|
-> | **APEX** | [`apex-sdlc`](https://github.com/doubts-suplab/apex-sdlc) | AI-powered SDLC — runs its phase agents on HALO |
-> | **EEIK** | [`eeik-bootstrap`](https://github.com/doubts-suplab/eeik-bootstrap) | Bootstrap kit — activates HALO via the `agent-harness` capability pack |
-> | **HALO** | `agent-harness` ← **you are here** | Generic agent runtime — the governed execution layer |
-> | **Aether** | [`aether-grid`](https://github.com/doubts-suplab/aether-grid) · [`aether-iel`](https://github.com/doubts-suplab/aether-iel) | Cognitive fabric — Grid's agent mesh runs on HALO; AIEL specifies the contract |
+> **HALO · Harness for Agent Lifecycle & Oversight.** A vendor-neutral runtime that governs what your AI
+> agents are allowed to *do* — a confidence gate, a default-deny tool registry, audit, human review, and a
+> kill switch around every agent decision. Language-neutral protocol; Python and Java reference bindings.
 
 ---
 
-## Where it fits
+## The problem
 
-| Layer | Repo | Role |
-|---|---|---|
-| Methodology / spec | `aether-iel` (AIEL) | Agent contract, authority ladder, confidence gate, governance controls, eval thresholds. Doc-only. |
-| Bootstrapping / config | `eeik-bootstrap` | Manifest → capability packs → generators. Not runnable. |
-| **Generic agent runtime** | **`agent-harness` ← this repo** | The reusable runtime AIEL references. Brand-neutral. |
-| Products / runtimes | `apex-sdlc`, `aether-grid`, `aether-core` | Consume the harness instead of re-implementing agent execution. |
+An LLM agent that only *answers* is low-stakes. An agent that **acts** — refunds a payment, closes a
+ticket, merges a PR, emails a customer — is not. The moment agents take real actions, every team ends up
+hand-rolling the same governance layer:
 
-Before `agent-harness`, every product hand-rolled the same shape — typed envelope → confidence gate → tool
-registry → orchestration → audit. This repo makes that a single, conformant, reusable runtime.
+- "Only auto-apply this if the model is confident enough — otherwise send it to a human."
+- "This agent may *flag* risk but must never *block*."
+- "An agent can only call the three tools on its allowlist — nothing else, ever."
+- "Every decision must be audited, with PII stripped, and we need a way to stop everything without a deploy."
 
----
+**HALO is that layer, built once and done right.** It sits between an agent's decision logic and the
+outside world and makes agent execution **safe, governed, observable, and reproducible** — regardless of
+which LLM, memory store, or tools the agent uses, and regardless of host language or framework. It owns the
+*execution contract*, not your prompts or business logic.
 
-## What the harness owns
+It is defined by a [normative, language-neutral protocol](docs/spec/harness-protocol.md) with a
+[machine-readable conformance checklist](docs/spec/harness-protocol.md#9-conformance-checklist); the Python
+and Java bindings both implement it identically.
 
-1. A typed **agent I/O envelope** — one `AgentInput` in, one `AgentOutput` out.
-2. A two-axis **authority + decision** model — static capability ceiling vs. dynamic per-invocation outcome.
-3. A centralized, **non-disableable confidence gate** — `confidence < 0.8 → autoEnforced=false → human review`.
-4. A runtime-enforced, **default-deny tool registry** — explicit allowlists, no wildcards, violations are security events.
-5. Composable **orchestration** — Pipeline, Fan-out, Supervisor+Workers (supervisor holds no tools), Debate.
-6. Pluggable **ports** — LLM, ToolRegistry, Policy, Audit, HumanReview, Observability, Memory, KillSwitch.
-7. Deterministic **failure-mode defaults** — every failure resolves to a safe, non-enforcing decision.
+## What HALO gives you
 
-It does **not** own prompts, business logic, memory content, or product UX.
+1. A typed **agent I/O envelope** — one `AgentInput` in, one `AgentOutput` out; every call scoped by tenant + user.
+2. A two-axis **authority + decision** model — a static capability *ceiling* per agent vs. the dynamic *outcome* of one call.
+3. A centralized, **non-disableable confidence gate** — `confidence < 0.8 → not auto-enforced → human review`. The agent never decides this; the harness does.
+4. A runtime-enforced, **default-deny tool registry** — explicit allowlists, no wildcards, violations are security events; `write`/`external` tool calls are gated on confidence *before they run*.
+5. Composable **orchestration** — Pipeline, Fan-out, Debate/Consensus, and Supervisor+Workers (the supervisor holds no tools).
+6. Pluggable **ports** — LLM, ToolRegistry, Policy, Audit, HumanReview, Observability, Memory, KillSwitch — with reference adapters (in-memory, durable file, OpenTelemetry, OpenAI-compatible/Anthropic LLMs).
+7. Deterministic **failure-mode defaults** — every failure resolves to a safe, non-enforcing decision. It never fails open.
 
----
+## Minimal example
 
-## Status
+No ecosystem, no config — an agent is any object with a name, an authority ceiling, the decisions it may
+emit, and a `run` method:
 
-**Increment 0 — Specification**, **Increment 1 — Python reference**, and **Increment 2 — Java binding +
-apex-sdlc consumer** are in. apex-sdlc is the first real consumer and now runs **all seven of its SDLC
-phase agents** on the harness (Requirements, Architecture, Development, Testing, CI/CD, Docs, Governance);
-its [reference journey](https://github.com/doubts-suplab/apex-sdlc/blob/main/examples/reference-project/README.md)
-walks one project through every phase offline, with the harness — not the agents — deciding enforcement.
+```python
+from agent_harness import AgentInput, AuthorityLevel, Decision, DecisionAction, Harness
 
-**Increment 3 — Protocol completeness** is now in, in both languages: all four orchestration patterns
-(Pipeline §6.1, Fan-out §6.2, Debate/Consensus §6.4, and Supervisor + Workers §6.3 with a real,
-harness-governed planning turn) plus **side-effect gating** (T-5, §5.3) — the harness refuses ungoverned
-`write`/`external` tool calls before they execute. See [ADR-0011](docs/decisions/ADR-0011-side-effect-gating.md).
 
-**Roadmap:** the plan for Increments 4–7 — production adapters & observability, adoption (packaging,
-examples, standalone docs), test hardening, and cross-language + formal conformance — is tracked with
-feasibility ratings in [`docs/roadmap.md`](docs/roadmap.md). Increments 4–7 are planned, not started.
+class RefundApprover:
+    name = "refund-approver"
+    authority_level = AuthorityLevel.BLOCK                      # its capability ceiling
+    capabilities = frozenset({DecisionAction.ALLOW, DecisionAction.BLOCK})
 
-Specification:
-- [`docs/spec/harness-protocol.md`](docs/spec/harness-protocol.md) — the normative, language-neutral protocol.
-- [`docs/spec/agent-contract.schema.json`](docs/spec/agent-contract.schema.json) — machine-readable Agent Contract schema.
-- [`docs/decisions/`](docs/decisions/) — ADR-0001..0012.
+    def run(self, request: AgentInput, tools) -> Decision:
+        amount = request.context["amount"]
+        if amount > 1000:
+            return Decision(DecisionAction.BLOCK, confidence=0.99, rationale="over policy limit")
+        return Decision(DecisionAction.ALLOW, confidence=0.75, rationale="within policy")
 
-Reference implementation — **Python** (`bindings/python/src/agent_harness/`, 3.11+, framework-free core):
-- `core/` — envelope, authority/decision model, confidence gate, tool registry, side-effect policy, harness.
-- `orchestration/` — Pipeline (§6.1), Fan-out (§6.2), Debate/Consensus (§6.4), Supervisor + Workers. `ports/` — LLM + governance Protocols. `adapters/` — in-memory + LLM stub.
-- `contract.py` — loads/validates Agent Contracts against the schema.
-- `tests/` — 74 tests, mapping to the spec §9 conformance checklist.
 
-**Java** binding (`bindings/java/`, `com.agentharness:agent-harness-java`, plain Java 21, framework-free) —
-the Java counterpart with the same protocol and §9 checklist, plus an `interop.LegacyAgentAdapter` for the
-aether-grid migration. 54 JUnit tests (`cd bindings/java && mvn test`). See [ADR-0009](docs/decisions/ADR-0009-java-binding.md).
+harness = Harness()   # zero-config: in-memory reference adapters
+
+high = harness.invoke(RefundApprover(), AgentInput("acme", "u1", context={"amount": 5000}))
+print(high.decision.action, high.decision.auto_enforced)   # BLOCK True  — confident + within authority
+
+low = harness.invoke(RefundApprover(), AgentInput("acme", "u1", context={"amount": 20}))
+print(low.decision.action, low.decision.auto_enforced)     # ALLOW False — 0.75 < 0.8 → routed to a human
+```
+
+`auto_enforced` was decided by the **harness gate**, never by the agent — and the low-confidence ALLOW was
+automatically queued for human review. That inversion of control is the whole point.
+
+## How HALO compares
+
+HALO is a **governance/oversight** layer, not another way to *build* or *orchestrate* agents — so it is
+**complementary** to the frameworks below. You can build an agent with LangGraph, CrewAI, or a raw SDK and
+run it *under* HALO to get the gate, registry, audit, and kill switch.
+
+| Capability | **HALO** | LangChain / LangGraph | CrewAI | AutoGen | Raw provider SDK |
+|---|:--:|:--:|:--:|:--:|:--:|
+| Primary focus | Governance & oversight | Building & orchestration | Role-based multi-agent | Conversational multi-agent | Model calls + tool-use |
+| Centralized, non-disableable confidence gate | ✅ | DIY | DIY | DIY | — |
+| Default-deny tool registry enforced by the runtime | ✅ | DIY | DIY | DIY | — |
+| Static authority ceiling vs. dynamic decision | ✅ | — | — | — | — |
+| Append-only, PII-redacted audit | ✅ | DIY | DIY | DIY | — |
+| Human-review queue with SLA enforcement | ✅ | DIY | DIY | partial (HITL) | — |
+| System-wide kill switch (no deploy) | ✅ | — | — | — | — |
+| Safe failure defaults (never fails open) | ✅ | DIY | DIY | DIY | — |
+| Language-neutral normative spec + conformance | ✅ | — | — | — | — |
+| Vendor / framework neutral | ✅ | Py/JS ecosystem | Python | Python | single vendor |
+
+> ✅ first-class and enforced by the runtime · DIY achievable by wiring it yourself · partial available but limited · — not a focus.
+> Comparisons reflect each project's primary design intent, not a claim that the others *cannot* be extended.
+
+## Install & run
+
+```bash
+cd bindings/python
+python3 -m venv .venv && source .venv/bin/activate    # Python 3.11+
+pip install -e ".[test]"         # library + test deps
+
+pytest                           # 121 tests, mapping to the §9 conformance checklist
+python examples/quickstart.py    # end-to-end demo
+```
+
+The **core** (`core`, `ports`, `orchestration`) has **no third-party dependencies** — it is framework-free
+by design. Optional adapters live behind extras: `contract` (schema validation), `llm` (OpenAI-compatible +
+Anthropic providers), `otel` (OpenTelemetry). Java: `cd bindings/java && mvn test` (80 JUnit tests).
 
 ## Repository layout
 
 The protocol is language-neutral; each implementation is a peer **binding** under `bindings/`, with the
-normative spec and decision records shared at the root (see [ADR-0012](docs/decisions/ADR-0012-bindings-layout.md)):
+normative spec and decision records shared at the root ([ADR-0012](docs/decisions/ADR-0012-bindings-layout.md)):
 
 ```
 docs/spec/        normative protocol + Agent Contract schema (canonical, language-neutral)
@@ -109,41 +128,46 @@ bindings/python/  Python reference binding (src/, tests/, examples/, pyproject.t
 bindings/java/    Java binding (src/, pom.xml)
 ```
 
-## Install & run
+## Status
 
-```bash
-cd bindings/python
-python3 -m venv .venv && source .venv/bin/activate   # Python 3.11+
-pip install -e ".[test]"        # library + test deps
+Increments 0–3 are in; Increment 4 (production adapters) is largely delivered:
 
-pytest                          # 74 tests, mapping to the §9 conformance checklist
-python examples/quickstart.py   # end-to-end demo
-```
+- **0 — Specification** · **1 — Python reference** · **2 — Java binding + apex-sdlc consumer.**
+- **3 — Protocol completeness** (both languages): all four orchestration patterns + side-effect gating (T-5, §5.3).
+- **4 — Production adapters** (in progress): human-review SLA monitoring, durable file audit, cross-process
+  kill switch, Memory/Policy adapters, pluggable redaction, OpenTelemetry exporter, and OpenAI-compatible +
+  Anthropic LLM providers.
 
-```python
-from agent_harness import AgentInput, Harness      # zero-config: in-memory adapters by default
-out = Harness().invoke(my_agent, AgentInput("tenant", "user", context={...}))
-# out.decision.auto_enforced was decided by the harness gate — never by the agent
-```
-
-The **core** (`core`, `ports`, `orchestration`) has no third-party dependencies. `contract` validation and
-the test suite pull `jsonschema`/`pytest` via extras. Next: aether-grid consumes the Java binding (centralize
-its duplicated confidence gate). See [`docs/progress.md`](docs/progress.md).
-
----
+Full detail in [`docs/progress.md`](docs/progress.md); the forward plan (Increments 5–7) with feasibility
+ratings is in [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Reading order
 
-1. [`docs/spec/harness-protocol.md`](docs/spec/harness-protocol.md) — start here.
-2. [`docs/decisions/`](docs/decisions/) — why the protocol is shaped this way.
+1. [`docs/spec/harness-protocol.md`](docs/spec/harness-protocol.md) — the normative, language-neutral protocol. Start here.
+2. [`docs/decisions/`](docs/decisions/) — ADR-0001..0012: why the protocol is shaped this way.
 3. [`docs/spec/agent-contract.schema.json`](docs/spec/agent-contract.schema.json) — the contract an agent is built from.
 
-## Bootstrapping
+---
 
-This repo follows `eeik-bootstrap` conventions (`CLAUDE.md`, `.claude/`, `project-manifest.yaml` provenance)
-and is activatable in downstream AI/agent projects via the **`agent-harness` EEIK capability pack**. See
-[ADR-0008](docs/decisions/ADR-0008-eeik-bootstrap-integration.md).
+## Where it fits — the Aether ecosystem
+
+HALO is useful entirely on its own. It also happens to be the generic runtime that the **Aether
+Intelligence Engineering Lifecycle (AIEL)** specifies but does not build — so the ecosystem's platforms
+**consume** it (it consumes nothing from them):
+
+| Platform | Repo | Role |
+|---|---|---|
+| **APEX** | [`apex-sdlc`](https://github.com/doubts-suplab/apex-sdlc) | AI-powered SDLC — runs all seven of its phase agents on HALO |
+| **EEIK** | [`eeik-bootstrap`](https://github.com/doubts-suplab/eeik-bootstrap) | Bootstrap kit — activates HALO via the `agent-harness` capability pack |
+| **HALO** | `agent-harness` ← **you are here** | Generic agent runtime — the governed execution layer |
+| **Aether** | [`aether-grid`](https://github.com/doubts-suplab/aether-grid) · [`aether-iel`](https://github.com/doubts-suplab/aether-iel) | Cognitive fabric — Grid's agent mesh runs on HALO; AIEL specifies the contract |
+
+Before `agent-harness`, every one of these hand-rolled the same shape — typed envelope → confidence gate →
+tool registry → orchestration → audit. This repo makes that a single, conformant, reusable runtime.
+
+This repo also follows `eeik-bootstrap` conventions (`CLAUDE.md`, `.claude/`, `project-manifest.yaml`) and is
+activatable downstream via the **`agent-harness` EEIK capability pack** ([ADR-0008](docs/decisions/ADR-0008-eeik-bootstrap-integration.md)).
 
 ## License
 
-AGPL-3.0. See [LICENSE](LICENSE).
+AGPL-3.0 — see [LICENSE](LICENSE) and, for what that means if you build on HALO, [LICENSING.md](LICENSING.md).

@@ -207,14 +207,14 @@
   <body>
     <div class="wrap">
       <header>
-        <span class="tag">Increment 3 · Protocol completeness</span>
+        <span class="tag">Increment 4 · Production adapters</span>
         <h1>HALO</h1>
         <p class="lead">
           <strong>Harness for Agent Lifecycle &amp; Oversight.</strong> A
-          generic, enterprise-grade agent runtime — a <em>halo</em> of oversight
-          (gate, audit, human review, kill switch) around every agent decision.
-          Language-neutral protocol; vendor-neutral runtime (repo
-          <code>agent-harness</code>). A peer of APEX, EEIK, and Aether.
+          vendor-neutral runtime that governs what your AI agents are allowed to
+          <em>do</em> — a confidence gate, a default-deny tool registry, audit,
+          human review, and a kill switch around every agent decision.
+          Language-neutral protocol; Python and Java reference bindings.
         </p>
         <p class="badges">
           <a
@@ -237,7 +237,7 @@
             alt="Java 21"
           />
           <img
-            src="https://img.shields.io/badge/tests-Python%2074%20%C2%B7%20Java%2054-brightgreen.svg"
+            src="https://img.shields.io/badge/tests-Python%20121%20%C2%B7%20Java%2080-brightgreen.svg"
             alt="Tests"
           />
           <img
@@ -256,19 +256,61 @@
         </p>
       </header>
 
+      <h2>The problem</h2>
       <p>
-        The harness makes agent execution
-        <strong>safe, governed, observable, and reproducible</strong> — whatever
-        LLM, memory store, or tools an agent uses, and whatever the host
-        language. It is a generic implementation of the "agent runtime" that the
-        <a href="https://github.com/doubts-suplab/aether-iel"
-          >Aether Intelligence Engineering Lifecycle (AIEL)</a
+        An LLM agent that only <em>answers</em> is low-stakes. An agent that
+        <strong>acts</strong> — refunds a payment, merges a PR, emails a
+        customer — is not. The moment agents take real actions, every team
+        hand-rolls the same governance layer: auto-apply only above a confidence
+        bar (else send to a human); let an agent <em>flag</em> risk but never
+        <em>block</em>; restrict each agent to an explicit tool allowlist; audit
+        every decision with PII stripped; and stop everything without a deploy.
+        <strong
+          >HALO is that layer, built once — a
+          <a href="spec/harness-protocol.md">normative, language-neutral protocol</a>
+          with reference bindings in Python and Java.</strong
         >
-        specifies but does not build. Products <em>consume</em> it; it consumes
-        nothing from them.
+        It owns the execution contract, not your prompts or business logic.
       </p>
 
-      <h2>Where it fits</h2>
+      <h2>How HALO compares</h2>
+      <p>
+        HALO is a <strong>governance / oversight</strong> layer, not another way
+        to <em>build</em> or <em>orchestrate</em> agents — so it is
+        <strong>complementary</strong> to the frameworks below. Build an agent
+        with LangGraph, CrewAI, or a raw SDK and run it <em>under</em> HALO to
+        get the gate, registry, audit, and kill switch.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th>HALO</th>
+            <th>LangChain / LangGraph</th>
+            <th>CrewAI</th>
+            <th>AutoGen</th>
+            <th>Raw SDK</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Primary focus</td><td>Governance &amp; oversight</td><td>Building &amp; orchestration</td><td>Role-based multi-agent</td><td>Conversational multi-agent</td><td>Model calls + tool-use</td></tr>
+          <tr><td>Centralized, non-disableable confidence gate</td><td>✅</td><td>DIY</td><td>DIY</td><td>DIY</td><td>—</td></tr>
+          <tr><td>Default-deny tool registry (runtime-enforced)</td><td>✅</td><td>DIY</td><td>DIY</td><td>DIY</td><td>—</td></tr>
+          <tr><td>Authority ceiling vs. dynamic decision</td><td>✅</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>Append-only, PII-redacted audit</td><td>✅</td><td>DIY</td><td>DIY</td><td>DIY</td><td>—</td></tr>
+          <tr><td>Human-review queue with SLA</td><td>✅</td><td>DIY</td><td>DIY</td><td>partial</td><td>—</td></tr>
+          <tr><td>System-wide kill switch (no deploy)</td><td>✅</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>Language-neutral normative spec + conformance</td><td>✅</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <p style="color: var(--muted); font-size: 0.9rem">
+        ✅ first-class and enforced by the runtime · DIY achievable by wiring it
+        yourself · partial available but limited · — not a focus. Comparisons
+        reflect each project's primary design intent, not a claim that the others
+        cannot be extended.
+      </p>
+
+      <h2>Where it fits — the Aether ecosystem</h2>
       <table>
         <thead>
           <tr>
@@ -415,9 +457,13 @@
         and Supervisor+Workers with a governed planning turn) plus
         <strong>side-effect gating</strong> (T-5, §5.3, ADR-0011) — the harness
         refuses ungoverned <code>write</code>/<code>external</code> tool calls
-        before they execute. Every binding maps 1:1 to the spec §9 conformance
-        checklist (<strong>Python 74</strong> · <strong>Java 54</strong> tests).
-        See <a href="progress.md">progress.md</a>.
+        before they execute. <strong>Increment 4</strong> adds production
+        adapters (human-review SLA monitoring, durable file audit, cross-process
+        kill switch, Memory/Policy, pluggable redaction, an OpenTelemetry
+        exporter, and OpenAI-compatible + Anthropic LLM providers). Every binding
+        maps 1:1 to the spec §9 conformance checklist (<strong>Python 121</strong>
+        · <strong>Java 80</strong> tests). See
+        <a href="progress.md">progress.md</a>.
       </p>
 
       <div class="note">
