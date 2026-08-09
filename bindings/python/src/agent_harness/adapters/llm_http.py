@@ -5,8 +5,10 @@ by ``base_url`` covers OpenAI, Groq, Ollama, Gemini (its OpenAI-compat endpoint)
 a compatible provider is *config, not code* (see :data:`PROVIDERS`). Anthropic is not OpenAI-compatible
 natively; use :mod:`agent_harness.adapters.llm_anthropic`.
 
-Dependency-free: the default transport is stdlib ``urllib``. Inject a ``transport`` to test offline (no
-network). API keys come from the environment — never hardcoded. Streaming is deferred; use ``complete``.
+The default transport is an async ``httpx`` client (install the ``llm`` extra:
+``pip install "agent-harness[llm]"``); ``httpx`` is imported lazily, so merely importing this module
+never requires it. Inject a ``transport`` to test offline (no network, no ``httpx``). API keys come from
+the environment — never hardcoded. Streaming is deferred; use ``complete``.
 
 The preset base URLs / default models are best-effort as of authoring and move fast — verify against the
 provider's live docs before relying on them.
@@ -14,32 +16,28 @@ provider's live docs before relying on them.
 
 from __future__ import annotations
 
-import asyncio
 import json
 import os
-import urllib.error
-import urllib.request
 from dataclasses import dataclass
-from typing import Callable
+from typing import Awaitable, Callable
 
 from ..ports.llm import CompletionResult, Message, ToolCall, ToolDefinition
 
-# A transport sends one HTTP request and returns (status_code, body_bytes). Injectable for tests.
-Transport = Callable[[str, str, dict, bytes], "tuple[int, bytes]"]
+# An async transport sends one HTTP request and returns (status_code, body_bytes). Injectable for tests.
+Transport = Callable[[str, str, dict, bytes], Awaitable["tuple[int, bytes]"]]
 
 
 class LlmError(RuntimeError):
     """A provider returned a non-2xx response or an unparseable body."""
 
 
-def urllib_transport(method: str, url: str, headers: dict, body: bytes, *, timeout: float = 30.0):
-    """Default stdlib transport. Returns (status, body) even on HTTP error, so callers raise cleanly."""
-    req = urllib.request.Request(url, data=body, headers=headers, method=method)
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 (trusted, configured URL)
-            return resp.status, resp.read()
-    except urllib.error.HTTPError as exc:
-        return exc.code, exc.read()
+async def httpx_transport(method: str, url: str, headers: dict, body: bytes, *, timeout: float = 30.0):
+    """Default async transport (httpx). Returns (status, body) — non-2xx is surfaced by the caller."""
+    import httpx  # lazily imported: only needed for real network calls (the 'llm' extra)
+
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        resp = await client.request(method, url, headers=headers, content=body)
+        return resp.status_code, resp.content
 
 
 class OpenAICompatibleLlm:
@@ -61,7 +59,7 @@ class OpenAICompatibleLlm:
         self.model = model
         self.provider_name = provider_name
         self._api_key = api_key or (os.environ.get(api_key_env) if api_key_env else None)
-        self._transport = transport or (lambda m, u, h, b: urllib_transport(m, u, h, b, timeout=timeout))
+        self._transport = transport or (lambda m, u, h, b: httpx_transport(m, u, h, b, timeout=timeout))
         self._extra_headers = dict(extra_headers or {})
 
     async def complete(
@@ -81,8 +79,8 @@ class OpenAICompatibleLlm:
         if tools:
             payload["tools"] = [_openai_tool(t) for t in tools]
 
-        status, body = await asyncio.to_thread(
-            self._transport, "POST", f"{self._base_url}/chat/completions", self._headers(), _dump(payload)
+        status, body = await self._transport(
+            "POST", f"{self._base_url}/chat/completions", self._headers(), _dump(payload)
         )
         if status >= 400:
             raise LlmError(f"{self.provider_name} returned HTTP {status}: {body.decode('utf-8', 'replace')[:500]}")

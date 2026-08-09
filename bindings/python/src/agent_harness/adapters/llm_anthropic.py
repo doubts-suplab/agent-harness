@@ -4,19 +4,18 @@ Anthropic is not OpenAI-compatible on the wire: the system prompt is a top-level
 ``input_schema``, and responses are a list of ``content`` blocks (``text`` and ``tool_use``). This adapter
 maps the harness ``LlmPort`` shape onto that API natively.
 
-Dependency-free: the default transport is stdlib ``urllib`` (shared with the OpenAI-compatible adapter).
-Inject a ``transport`` to test offline. The API key comes from ``ANTHROPIC_API_KEY`` — never hardcoded.
-Streaming is deferred; use ``complete``.
+The default transport is the shared async ``httpx`` client (the ``llm`` extra); ``httpx`` is imported
+lazily. Inject a ``transport`` to test offline. The API key comes from ``ANTHROPIC_API_KEY`` — never
+hardcoded. Streaming is deferred; use ``complete``.
 """
 
 from __future__ import annotations
 
-import asyncio
 import json
 import os
 
 from ..ports.llm import CompletionResult, Message, ToolCall, ToolDefinition
-from .llm_http import LlmError, Transport, urllib_transport
+from .llm_http import LlmError, Transport, httpx_transport
 
 _DEFAULT_VERSION = "2023-06-01"
 
@@ -38,7 +37,7 @@ class AnthropicLlm:
         self.provider_name = "anthropic"
         self._base_url = base_url.rstrip("/")
         self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
-        self._transport = transport or (lambda m, u, h, b: urllib_transport(m, u, h, b, timeout=timeout))
+        self._transport = transport or (lambda m, u, h, b: httpx_transport(m, u, h, b, timeout=timeout))
         self._version = anthropic_version
 
     async def complete(
@@ -62,8 +61,8 @@ class AnthropicLlm:
         if tools:
             payload["tools"] = [_anthropic_tool(t) for t in tools]
 
-        status, body = await asyncio.to_thread(
-            self._transport, "POST", f"{self._base_url}/messages", self._headers(), _dump(payload)
+        status, body = await self._transport(
+            "POST", f"{self._base_url}/messages", self._headers(), _dump(payload)
         )
         if status >= 400:
             raise LlmError(f"anthropic returned HTTP {status}: {body.decode('utf-8', 'replace')[:500]}")

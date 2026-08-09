@@ -18,14 +18,14 @@ from agent_harness.ports.llm import Message, ToolDefinition
 
 
 class FakeTransport:
-    """Records the last request and returns a canned (status, body)."""
+    """Records the last request and returns a canned (status, body). Async, matching the transport type."""
 
     def __init__(self, status: int, body: dict):
         self.status = status
         self.body = json.dumps(body).encode()
         self.calls: list[dict] = []
 
-    def __call__(self, method, url, headers, body):
+    async def __call__(self, method, url, headers, body):
         self.calls.append(
             {"method": method, "url": url, "headers": headers, "payload": json.loads(body)}
         )
