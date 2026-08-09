@@ -61,6 +61,15 @@ Python 3.11+ framework-free core, `bindings/python/src/agent_harness/` (see [ADR
   deleting the 3 duplicated `0.8` checks (`AgentOutput`, `GovernanceAgent`, `TemporalPredictionAgent`).
   `GovernanceAgent` routes through `Harness.invoke`; BLOCK now auto-enforces at ≥ 0.95. 39 aether-agents tests
   green. Grid docs synced. (Remaining 6 agents migrate incrementally; tool registry is net-new for grid.)
+- [x] **eeik-bootstrap consumes the Python runtime (v1.4).** EEIK's generators run on the harness via
+  `eeik/generation.py` — a fourth consumer. Generation is modelled as a `SUGGEST`-authority
+  agent, so the gate (G-5) guarantees it never auto-enforces: drafts are audited and routed to human
+  review, and it fails safe when the harness is absent. See eeik `ADR-003`; `eeik demo` runs it offline.
+- [x] **eeik generates Agent Contracts against this spec.** `eeik contract` emits
+  `agent-contract.schema.json`-conformant contracts from its blueprints and validates them via this repo's
+  own `agent_harness.contract.validate_contract` (schema + §3.3 binding rule). Closes the chain: EEIK
+  generates against this repo's Agent Contract schema → HALO runs it. (This schema formalizes the AIEL
+  template; AIEL is upstream of HALO, with no dependency on EEIK.) See eeik `ADR-009`.
 - [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
   — carried into [roadmap Increment 6](roadmap.md#increment-6--test-hardening--consumer-migration-p4)
   alongside finishing the remaining aether-grid agent migrations.
