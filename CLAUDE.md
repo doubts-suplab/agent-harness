@@ -9,7 +9,9 @@
 **HALO** — *Harness for Agent Lifecycle & Oversight* — is a **generic, enterprise-grade agent runtime**
 (`doubts-suplab/agent-harness`): the layer that sits between an agent's decision logic and the outside world
 and makes agent execution **safe, governed, observable, and reproducible**. HALO is the product identity; the
-repo and coordinates stay `agent-harness` / `com.agentharness` / `agent_harness` (ADR-0010).
+repo stays `agent-harness`, and the published coordinates are now `halo-agent-harness` (PyPI),
+`com.suplab.agentharness:halo-agent-harness` (Maven), import `halo_agent_harness` / package
+`com.suplab.agentharness.*` (ADR-0013, which supersedes the earlier neutral-coordinates convention in ADR-0010).
 
 It is deliberately **vendor-neutral**: it depends on no product, imports no product internals, and is not
 owned by any single application — a first-class peer of APEX, EEIK, and Aether. It is a generic implementation of the "agent runtime" that the
@@ -55,7 +57,7 @@ cross-language + formal conformance) is tracked in
 | Layer | Technology |
 |---|---|
 | Protocol | Language-neutral specification (Markdown + JSON Schema draft-07) |
-| Reference implementation | Python 3.11+ (`bindings/python/`) and a Java 21 binding (`bindings/java/`, `com.agentharness`) |
+| Reference implementation | Python 3.11+ (`bindings/python/`) and a Java 21 binding (`bindings/java/`, `com.suplab.agentharness`) |
 | LLM port shape | Adopted from the apex-sdlc provider abstraction (`Message`/`ToolDefinition`/`ToolCall`/`CompletionResult`) |
 | Docs | Markdown + a single-page `docs/index.html` mirroring the README |
 | License | AGPL-3.0 |

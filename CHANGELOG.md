@@ -30,7 +30,13 @@ Both language bindings track the same protocol version. The Python package versi
 
 ## [Unreleased]
 
-Nothing yet beyond the increments below.
+### Changed (BREAKING)
+
+- **Rebranded to `halo-agent-harness` / `com.suplab.agentharness`** ([ADR-0013](docs/decisions/ADR-0013-halo-rebrand.md),
+  supersedes ADR-0010). Full rename across coordinates **and** code namespaces:
+  - PyPI distribution `agent-harness` → **`halo-agent-harness`**; Python import `agent_harness` → **`halo_agent_harness`**.
+  - Maven `com.agentharness:agent-harness-java` → **`com.suplab.agentharness:halo-agent-harness`**; Java package `com.agentharness.*` → **`com.suplab.agentharness.*`**.
+  - Consumers must update their imports/coordinates. The Git repository name, the spec, and the protocol semantics are unchanged; version stays `0.1.0`.
 
 ## [0.1.0] — Increments 0–4
 

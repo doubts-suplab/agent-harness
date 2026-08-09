@@ -25,7 +25,7 @@ Goal: decide the shape of the harness before writing runtime code.
 
 ## Increment 1 — Python reference implementation ✅ (in review)
 
-Python 3.11+ framework-free core, `bindings/python/src/agent_harness/` (see [ADR-0012](decisions/ADR-0012-bindings-layout.md)).
+Python 3.11+ framework-free core, `bindings/python/src/halo_agent_harness/` (see [ADR-0012](decisions/ADR-0012-bindings-layout.md)).
 
 - [x] Core: `AgentInput`/`AgentOutput` envelope, two-axis authority/decision model (`core/model.py`)
 - [x] Centralized non-disableable confidence gate + bypass counter (`core/gate.py`)
@@ -51,12 +51,12 @@ Python 3.11+ framework-free core, `bindings/python/src/agent_harness/` (see [ADR
   dependency; **20 bridge/agent/journey tests green** on Python 3.11 (`pytest --noconftest tests/agents/`).
   apex docs/HTML synced (backend + master CLAUDE.md, README, ROADMAP, `docs/personas.md`, reference-journey
   page). Required lowering the harness `requires-python` to 3.11 (ADR-0002 amendment).
-- [x] **Java binding.** `bindings/java/` Maven module (`com.agentharness:agent-harness-java`, plain Java 21,
+- [x] **Java binding.** `bindings/java/` Maven module (`com.suplab.agentharness:halo-agent-harness`, plain Java 21,
   framework-free) — the Java counterpart to the Python reference: envelope, centralized confidence gate,
   default-deny tool registry, Supervisor+Workers, ports + in-memory adapters, and an
   `interop.LegacyAgentAdapter` for grid. **22 JUnit tests green** (19 conformance + 2 interop + 1 stub) via `mvn test`.
   See [ADR-0009](decisions/ADR-0009-java-binding.md).
-- [x] **aether-grid consumes the Java binding.** `aether-agents` depends on `com.agentharness:agent-harness-java`;
+- [x] **aether-grid consumes the Java binding.** `aether-agents` depends on `com.suplab.agentharness:halo-agent-harness`;
   the confidence gate is centralized in `HarnessConfidenceGate` (delegating to the harness `ConfidenceGate`),
   deleting the 3 duplicated `0.8` checks (`AgentOutput`, `GovernanceAgent`, `TemporalPredictionAgent`).
   `GovernanceAgent` routes through `Harness.invoke`; BLOCK now auto-enforces at ≥ 0.95. 39 aether-agents tests
@@ -67,7 +67,7 @@ Python 3.11+ framework-free core, `bindings/python/src/agent_harness/` (see [ADR
   review, and it fails safe when the harness is absent. See eeik `ADR-003`; `eeik demo` runs it offline.
 - [x] **eeik generates Agent Contracts against this spec.** `eeik contract` emits
   `agent-contract.schema.json`-conformant contracts from its blueprints and validates them via this repo's
-  own `agent_harness.contract.validate_contract` (schema + §3.3 binding rule). Closes the chain: EEIK
+  own `halo_agent_harness.contract.validate_contract` (schema + §3.3 binding rule). Closes the chain: EEIK
   generates against this repo's Agent Contract schema → HALO runs it. (This schema formalizes the AIEL
   template; AIEL is upstream of HALO, with no dependency on EEIK.) See eeik `ADR-009`.
 - [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
@@ -174,7 +174,7 @@ adapters live behind the existing port Protocols and are opt-in.
   id) and to **metrics** (`agent_invocations_total` counter + `agent_invocation_duration_ms` histogram),
   and mirrors harness counters — including `confidence_gate_bypass_total` — as OTel counters. It is an
   **optional** adapter (the `otel` extra: `opentelemetry-sdk`), deliberately *not* imported by
-  `agent_harness.adapters`, so the SDK is only needed when you import it. Offline-tested with the OTel
+  `halo_agent_harness.adapters`, so the SDK is only needed when you import it. Offline-tested with the OTel
   SDK's in-memory span exporter + metric reader, including an end-to-end `Harness` wiring. Python-only
   (`adapters/otel.py`); Java OTel would need a separate optional Maven module (deferred). Tests:
   `tests/test_otel.py` (4).
@@ -199,7 +199,7 @@ Lowering the barrier for someone outside the Aether family to evaluate and adopt
 - [x] **AGPL-3.0 implications callout + `LICENSING.md`.** A plain-language "what AGPL means if you build
   on HALO" guide (network/§13 copyleft, options, not-legal-advice disclaimer). License unchanged.
 - [x] **Agent Contract validation CLI.** `halo validate-contract <path.json>...` (console script +
-  `python -m agent_harness`) validates against the schema + binding rule (spec §3.3, §10), with batch
+  `python -m halo_agent_harness`) validates against the schema + binding rule (spec §3.3, §10), with batch
   support and meaningful exit codes (0 valid / 1 invalid / 2 missing). Added two more worked contract
   examples (`observe-monitor`, `advisory-reviewer`). Tests: `tests/test_cli.py` (5).
 - [x] **More examples (Python + Java).** Beyond `quickstart`: `orchestration` (all four patterns),
