@@ -11,9 +11,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from agent_harness import AgentInput, AuthorityLevel, Decision, DecisionAction, Harness
-from agent_harness.adapters import InMemoryAudit, InMemoryHumanReview, InMemoryKillSwitch, InMemoryObservability
-from agent_harness.core.agent import ToolInvoker
+from halo_agent_harness import AgentInput, AuthorityLevel, Decision, DecisionAction, Harness
+from halo_agent_harness.adapters import InMemoryAudit, InMemoryHumanReview, InMemoryKillSwitch, InMemoryObservability
+from halo_agent_harness.core.agent import ToolInvoker
 
 _ALL = frozenset({DecisionAction.ALLOW, DecisionAction.ALERT, DecisionAction.BLOCK, DecisionAction.DEFER})
 

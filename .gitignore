@@ -12,6 +12,10 @@ build/
 .venv*/
 venv/
 
+# Docs build output
+site/
+.cache/
+
 # Node (docs tooling, if any)
 node_modules/
 

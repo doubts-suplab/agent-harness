@@ -139,7 +139,7 @@ against the spec.
 | **CONTRIBUTING.md, issue/PR templates, public roadmap** (this file) | **S** | Community on-ramp; 1★/0 forks today. |
 | **Non-Aether usage examples** + comparison table | **S** | Positioning for outsiders. |
 | **Dual-naming consistency** (HALO ⇄ `agent-harness`) everywhere | **S** | ADR-0010 already sets the convention; audit README/docs/package metadata for consistency. |
-| **(Proposed) Rebrand distribution names to `halo-agent-harness`** — PyPI dist `halo-agent-harness`, Maven `com.suplab.agentharness:halo-agent-harness` | **M** | Future improvement; **supersedes/amends ADR-0010** (needs a new ADR). Prefer keeping the *import* surface stable — Python import package `agent_harness` and Java package `com.agentharness.*` can stay while only the published *artifact* coordinates change (distribution name ≠ import name), so consumers (apex-sdlc, aether-grid) don't break. Decide all-in package rename vs. artifact-only before doing it. |
+| **Rebrand to `halo-agent-harness` / `com.suplab.agentharness`** ✅ Done | **M** | [ADR-0013](decisions/ADR-0013-halo-rebrand.md) (supersedes ADR-0010). Full rename — coordinates **and** code namespaces: PyPI `halo-agent-harness`, import `halo_agent_harness`, Maven `com.suplab.agentharness:halo-agent-harness`, package `com.suplab.agentharness.*`. Breaking for consumers (apex-sdlc, aether-grid, eeik) — they migrate in their own repos. Repo name unchanged. |
 
 ---
 

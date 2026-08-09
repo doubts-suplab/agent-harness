@@ -53,7 +53,7 @@ No ecosystem, no config — an agent is any object with a name, an authority cei
 emit, and a `run` method:
 
 ```python
-from agent_harness import AgentInput, AuthorityLevel, Decision, DecisionAction, Harness
+from halo_agent_harness import AgentInput, AuthorityLevel, Decision, DecisionAction, Harness
 
 
 class RefundApprover:

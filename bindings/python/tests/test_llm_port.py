@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 
-from agent_harness.adapters import StubLlm
-from agent_harness.ports import LlmPort, Message
+from halo_agent_harness.adapters import StubLlm
+from halo_agent_harness.ports import LlmPort, Message
 
 
 def test_stub_satisfies_llm_port():

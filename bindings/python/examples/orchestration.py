@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable
 
-from agent_harness import (
+from halo_agent_harness import (
     AgentInput,
     AuthorityLevel,
     ConsensusRule,
@@ -24,7 +24,7 @@ from agent_harness import (
     SupervisorWorkers,
     Decision,
 )
-from agent_harness.core.agent import ToolInvoker
+from halo_agent_harness.core.agent import ToolInvoker
 
 _ALL = frozenset(
     {DecisionAction.ALLOW, DecisionAction.ALERT, DecisionAction.BLOCK, DecisionAction.DEFER}

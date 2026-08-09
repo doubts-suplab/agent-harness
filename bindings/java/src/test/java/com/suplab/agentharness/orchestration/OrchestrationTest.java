@@ -1,0 +1,357 @@
+package com.suplab.agentharness.orchestration;
+
+import com.suplab.agentharness.Agent;
+import com.suplab.agentharness.ConfidenceGate;
+import com.suplab.agentharness.Harness;
+import com.suplab.agentharness.ToolInvoker;
+import com.suplab.agentharness.ToolRegistry;
+import com.suplab.agentharness.adapters.InMemoryAudit;
+import com.suplab.agentharness.adapters.InMemoryHumanReview;
+import com.suplab.agentharness.adapters.InMemoryKillSwitch;
+import com.suplab.agentharness.adapters.InMemoryObservability;
+import com.suplab.agentharness.model.AgentInput;
+import com.suplab.agentharness.model.AuthorityLevel;
+import com.suplab.agentharness.model.Decision;
+import com.suplab.agentharness.model.DecisionAction;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/** Orchestration-pattern tests (harness-protocol.md §6). Every stage still passes the gate + registry (O-1). */
+class OrchestrationTest {
+
+    private static final Set<DecisionAction> ALL = Set.of(
+            DecisionAction.ALLOW, DecisionAction.ALERT, DecisionAction.BLOCK,
+            DecisionAction.SUGGEST, DecisionAction.DEFER);
+
+    private static final AgentInput REQ =
+            new AgentInput("t1", "u1", Map.of("task", "demo"), Map.of("correlationId", "corr-1"));
+
+    private ToolRegistry registry;
+    private InMemoryAudit audit;
+    private InMemoryHumanReview review;
+    private InMemoryObservability obs;
+    private InMemoryKillSwitch kill;
+    private Harness harness;
+
+    @BeforeEach
+    void setUp() {
+        registry = new ToolRegistry();
+        audit = new InMemoryAudit();
+        review = new InMemoryHumanReview();
+        obs = new InMemoryObservability();
+        kill = new InMemoryKillSwitch();
+        harness = new Harness(registry, audit, review, obs, kill, new ConfidenceGate());
+    }
+
+    private static Agent agent(String name, BiFunction<AgentInput, ToolInvoker, Decision> decide) {
+        return new StubAgent(name, AuthorityLevel.BLOCK, ALL, decide);
+    }
+
+    private static Agent agent(String name, AuthorityLevel authority,
+                              BiFunction<AgentInput, ToolInvoker, Decision> decide) {
+        return new StubAgent(name, authority, ALL, decide);
+    }
+
+    private static Agent fixed(String name, DecisionAction action, double confidence) {
+        return agent(name, (in, tools) -> Decision.propose(action, confidence, "because"));
+    }
+
+    private static Agent fixed(String name, AuthorityLevel authority, DecisionAction action, double confidence) {
+        return agent(name, authority, (in, tools) -> Decision.propose(action, confidence, "because"));
+    }
+
+    /** Local test agent (the package-private {@code FakeAgent} lives in a different test package). */
+    private record StubAgent(String name, AuthorityLevel authorityLevel, Set<DecisionAction> capabilities,
+                             BiFunction<AgentInput, ToolInvoker, Decision> decide) implements Agent {
+        @Override
+        public Decision decide(AgentInput input, ToolInvoker tools) {
+            return decide.apply(input, tools);
+        }
+    }
+
+    /** A supervisor that is also a {@link Planner} — selects a subset of workers. */
+    private record StubPlanner(String name, AuthorityLevel authorityLevel, Set<DecisionAction> capabilities,
+                               BiFunction<AgentInput, ToolInvoker, Decision> decide,
+                               java.util.function.BiFunction<AgentInput, List<String>, List<String>> selector)
+            implements Agent, Planner {
+        @Override
+        public Decision decide(AgentInput input, ToolInvoker tools) {
+            return decide.apply(input, tools);
+        }
+
+        @Override
+        public List<String> plan(AgentInput request, List<String> workerNames) {
+            return selector.apply(request, workerNames);
+        }
+    }
+
+    // -- Supervisor + Workers planning turn (§6.3) -------------------------
+    @Test
+    void supervisorPlanningTurnIsGoverned() {
+        Agent sup = fixed("sup", DecisionAction.ALLOW, 0.9);
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.ALLOW, 0.9),
+                fixed("w2", DecisionAction.ALERT, 0.9));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertEquals(3, audit.entries().size()); // supervisor + both workers (O-1)
+        assertEquals("sup", result.supervisorOutput().agentName());
+        assertEquals(0, obs.counter(Harness.BYPASS_COUNTER));
+    }
+
+    @Test
+    void supervisorHaltsDelegationOnBlock() {
+        Agent sup = fixed("sup", DecisionAction.BLOCK, 0.97);
+        List<Agent> workers = List.of(agent("w1",
+                (in, t) -> { throw new AssertionError("worker must not run when supervisor halts"); }));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertTrue(result.halted());
+        assertTrue(result.workerOutputs().isEmpty());
+        assertEquals(DecisionAction.BLOCK, result.reconciledAction());
+    }
+
+    @Test
+    void supervisorPlannerSelectsSubset() {
+        Agent sup = new StubPlanner("sup", AuthorityLevel.BLOCK, ALL,
+                (in, t) -> Decision.propose(DecisionAction.ALLOW, 0.9, "plan"),
+                (in, names) -> List.of("w2"));
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.BLOCK, 0.97),
+                fixed("w2", DecisionAction.ALERT, 0.9));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertEquals(List.of("w2"), result.delegated());
+        assertEquals(Set.of("w2"), result.workerOutputs().keySet());
+        assertEquals(DecisionAction.ALERT, result.reconciledAction()); // w1 (BLOCK) never engaged
+    }
+
+    @Test
+    void supervisorPlanIsConstrainedToRoster() {
+        Agent sup = new StubPlanner("sup", AuthorityLevel.BLOCK, ALL,
+                (in, t) -> Decision.propose(DecisionAction.ALLOW, 0.9, "plan"),
+                (in, names) -> List.of("w1", "ghost"));
+        List<Agent> workers = List.of(fixed("w1", DecisionAction.ALLOW, 0.9));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertEquals(List.of("w1"), result.delegated()); // bogus name filtered out
+    }
+
+    @Test
+    void supervisorDelegatesToAllByDefault() {
+        Agent sup = fixed("sup", DecisionAction.ALLOW, 0.9);
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.ALLOW, 0.9),
+                fixed("w2", DecisionAction.BLOCK, 0.97));
+        OrchestrationResult result = new SupervisorWorkers(harness, sup, workers).run(REQ);
+        assertEquals(Set.of("w1", "w2"), Set.copyOf(result.delegated()));
+        assertEquals(DecisionAction.BLOCK, result.reconciledAction());
+    }
+
+    // -- Pipeline (§6.1) ---------------------------------------------------
+    @Test
+    void pipelineRunsAllStagesInOrder() {
+        List<String> order = new ArrayList<>();
+        List<Agent> stages = List.of(
+                agent("s1", (in, t) -> { order.add("s1"); return Decision.propose(DecisionAction.ALLOW, 0.9, "ok"); }),
+                agent("s2", (in, t) -> { order.add("s2"); return Decision.propose(DecisionAction.ALLOW, 0.9, "ok"); }),
+                agent("s3", (in, t) -> { order.add("s3"); return Decision.propose(DecisionAction.ALLOW, 0.9, "ok"); }));
+        PipelineResult result = new Pipeline(harness, stages).run(REQ);
+        assertEquals(List.of("s1", "s2", "s3"), order);
+        assertEquals(DecisionAction.ALLOW, result.finalAction());
+        assertNull(result.shortCircuitedAt());
+    }
+
+    @Test
+    void pipelinePassesPriorDecisionIntoNextStageContext() {
+        Map<String, Object> seen = new java.util.HashMap<>();
+        List<Agent> stages = List.of(
+                agent("s1", (in, t) -> Decision.propose(DecisionAction.ALERT, 0.9, "raise an alert")),
+                agent("s2", (in, t) -> {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> p = (Map<String, Object>) in.context().get("pipeline");
+                    seen.putAll(p);
+                    return Decision.propose(DecisionAction.ALLOW, 0.9, "ok");
+                }));
+        new Pipeline(harness, stages).run(REQ);
+        assertEquals("s1", seen.get("prior_stage"));
+        assertEquals("ALERT", seen.get("prior_action"));
+        assertEquals(0.9, seen.get("prior_confidence"));
+        assertEquals("raise an alert", seen.get("prior_rationale"));
+    }
+
+    @Test
+    void pipelineShortCircuitsOnBlock() {
+        List<String> ran = new ArrayList<>();
+        List<Agent> stages = List.of(
+                agent("s1", (in, t) -> { ran.add("s1"); return Decision.propose(DecisionAction.ALLOW, 0.9, "ok"); }),
+                agent("s2", (in, t) -> { ran.add("s2"); return Decision.propose(DecisionAction.BLOCK, 0.99, "stop"); }),
+                agent("s3", (in, t) -> { ran.add("s3"); return Decision.propose(DecisionAction.ALLOW, 0.9, "ok"); }));
+        PipelineResult result = new Pipeline(harness, stages).run(REQ);
+        assertEquals(List.of("s1", "s2"), ran); // s3 never runs
+        assertEquals("s2", result.shortCircuitedAt());
+        assertEquals(DecisionAction.BLOCK, result.finalAction());
+    }
+
+    @Test
+    void pipelineEachStagePassesGateBypassZero() {
+        List<Agent> stages = List.of(
+                fixed("s1", DecisionAction.ALERT, 0.96),
+                fixed("s2", DecisionAction.ALLOW, 0.9));
+        new Pipeline(harness, stages).run(REQ);
+        assertEquals(0, obs.counter(Harness.BYPASS_COUNTER));
+        assertEquals(2, audit.entries().size()); // O-1: each stage went through the harness
+    }
+
+    @Test
+    void pipelineReconciledActionIsSafestSeen() {
+        List<Agent> stages = List.of(
+                fixed("s1", DecisionAction.ALLOW, 0.9),
+                fixed("s2", DecisionAction.ALERT, 0.9));
+        assertEquals(DecisionAction.ALERT, new Pipeline(harness, stages).run(REQ).reconciledAction());
+    }
+
+    @Test
+    void pipelineRequiresAtLeastOneStage() {
+        assertThrows(IllegalArgumentException.class, () -> new Pipeline(harness, List.of()));
+    }
+
+    // -- Fan-out (§6.2) ----------------------------------------------------
+    @Test
+    void fanOutRunsAllWorkersAndReconcilesToSafest() {
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.ALLOW, 0.9),
+                fixed("w2", DecisionAction.ALERT, 0.9),
+                fixed("w3", DecisionAction.BLOCK, 0.97));
+        FanOutResult result = new FanOut(harness, workers).run(REQ);
+        assertEquals(DecisionAction.BLOCK, result.reconciledAction()); // BLOCK wins the hierarchy
+        assertEquals(Set.of("w1", "w2", "w3"), result.workerOutputs().keySet());
+    }
+
+    @Test
+    void fanOutWorkerOutputsAreOrderStable() {
+        List<Agent> workers = List.of(
+                fixed("w0", DecisionAction.ALLOW, 0.9),
+                fixed("w1", DecisionAction.ALLOW, 0.9),
+                fixed("w2", DecisionAction.ALLOW, 0.9));
+        FanOutResult result = new FanOut(harness, workers).run(REQ);
+        assertEquals(List.of("w0", "w1", "w2"), List.copyOf(result.workerOutputs().keySet()));
+    }
+
+    @Test
+    void fanOutEachWorkerPassesGateBypassZero() {
+        List<Agent> workers = List.of(
+                fixed("w1", DecisionAction.BLOCK, 0.97),
+                fixed("w2", DecisionAction.ALERT, 0.9));
+        new FanOut(harness, workers).run(REQ);
+        assertEquals(0, obs.counter(Harness.BYPASS_COUNTER));
+        assertEquals(2, audit.entries().size()); // O-1: each worker went through the harness
+    }
+
+    @Test
+    void fanOutActuallyRunsWorkersConcurrently() throws Exception {
+        // A barrier of N only releases if all N workers reach it at once. If fan-out ran sequentially,
+        // the first worker's await would time out and the harness would return a safe DEFER instead of
+        // the intended ALERT.
+        int n = 4;
+        java.util.concurrent.CyclicBarrier barrier = new java.util.concurrent.CyclicBarrier(n);
+        List<Agent> workers = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            workers.add(agent("w" + i, (in, t) -> {
+                try {
+                    barrier.await(3, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                return Decision.propose(DecisionAction.ALERT, 0.9, "reached the barrier");
+            }));
+        }
+        FanOutResult result = new FanOut(harness, workers).run(REQ);
+        assertEquals(DecisionAction.ALERT, result.reconciledAction());
+        assertTrue(result.workerOutputs().values().stream()
+                .allMatch(o -> o.decision().action() == DecisionAction.ALERT));
+    }
+
+    @Test
+    void fanOutRequiresAtLeastOneWorker() {
+        assertThrows(IllegalArgumentException.class, () -> new FanOut(harness, List.of()));
+    }
+
+    // -- Debate / Consensus (§6.4) -----------------------------------------
+    @Test
+    void debateDefaultRuleIsSafest() {
+        Debate debate = new Debate(harness, List.of(fixed("a", DecisionAction.ALLOW, 0.9)));
+        assertEquals(ConsensusRule.SAFEST, debate.run(REQ).rule());
+    }
+
+    @Test
+    void debateSafestRuleStrictestActionWins() {
+        List<Agent> participants = List.of(
+                fixed("a", DecisionAction.ALLOW, 0.9),
+                fixed("b", DecisionAction.ALLOW, 0.9),
+                fixed("c", DecisionAction.BLOCK, 0.97));
+        DebateResult result = new Debate(harness, participants, ConsensusRule.SAFEST).run(REQ);
+        assertEquals(DecisionAction.BLOCK, result.consensusAction()); // one BLOCK beats two ALLOWs
+        assertFalse(result.tie());
+    }
+
+    @Test
+    void debateMajorityRulePluralityWinsAndMayDeescalate() {
+        List<Agent> participants = List.of(
+                fixed("a", DecisionAction.ALLOW, 0.9),
+                fixed("b", DecisionAction.ALLOW, 0.9),
+                fixed("c", DecisionAction.BLOCK, 0.97));
+        DebateResult result = new Debate(harness, participants, ConsensusRule.MAJORITY).run(REQ);
+        assertEquals(DecisionAction.ALLOW, result.consensusAction()); // majority de-escalates
+        assertFalse(result.tie());
+    }
+
+    @Test
+    void debateMajorityTieResolvesToDefer() {
+        List<Agent> participants = List.of(
+                fixed("a", DecisionAction.ALLOW, 0.9),
+                fixed("b", DecisionAction.BLOCK, 0.97));
+        DebateResult result = new Debate(harness, participants, ConsensusRule.MAJORITY).run(REQ);
+        assertEquals(DecisionAction.DEFER, result.consensusAction()); // tie -> human review
+        assertTrue(result.tie());
+    }
+
+    @Test
+    void debateConsensusNeverExceedsStrictestParticipant() {
+        for (ConsensusRule rule : ConsensusRule.values()) {
+            setUp();
+            List<Agent> participants = List.of(
+                    fixed("a", AuthorityLevel.OBSERVE, DecisionAction.ALLOW, 0.9),
+                    fixed("b", AuthorityLevel.ALERT, DecisionAction.ALERT, 0.9),
+                    fixed("c", AuthorityLevel.OBSERVE, DecisionAction.ALLOW, 0.9));
+            DebateResult result = new Debate(harness, participants, rule).run(REQ);
+            DecisionAction strictest = com.suplab.agentharness.model.Decisions.reconcile(
+                    result.participantOutputs().values().stream().map(o -> o.decision().action()).toList());
+            assertTrue(com.suplab.agentharness.model.Decisions.actionPrecedence(result.consensusAction())
+                    <= com.suplab.agentharness.model.Decisions.actionPrecedence(strictest));
+        }
+    }
+
+    @Test
+    void debateEachParticipantPassesGateBypassZero() {
+        List<Agent> participants = List.of(
+                fixed("a", DecisionAction.BLOCK, 0.97),
+                fixed("b", DecisionAction.ALERT, 0.9));
+        new Debate(harness, participants).run(REQ);
+        assertEquals(0, obs.counter(Harness.BYPASS_COUNTER));
+        assertEquals(2, audit.entries().size()); // O-1: each participant went through the harness
+    }
+
+    @Test
+    void debateRequiresAtLeastOneParticipant() {
+        assertThrows(IllegalArgumentException.class, () -> new Debate(harness, List.of()));
+    }
+}

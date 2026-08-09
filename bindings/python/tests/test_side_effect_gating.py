@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from agent_harness import (
+from halo_agent_harness import (
     AuthorityLevel,
     Decision,
     DecisionAction,
@@ -109,8 +109,8 @@ def test_observe_agent_cannot_call_write_tool(rig, request_):
 
 
 def test_custom_policy_thresholds_are_honoured(request_):
-    from agent_harness import Harness, ToolRegistry
-    from agent_harness.adapters import (
+    from halo_agent_harness import Harness, ToolRegistry
+    from halo_agent_harness.adapters import (
         InMemoryAudit,
         InMemoryHumanReview,
         InMemoryKillSwitch,

@@ -6,14 +6,14 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from agent_harness import AgentInput, Decision, DecisionAction
-from agent_harness.adapters import (
+from halo_agent_harness import AgentInput, Decision, DecisionAction
+from halo_agent_harness.adapters import (
     HUMAN_REVIEW_SLA_BREACH,
     InMemoryHumanReview,
     InMemoryObservability,
     SlaMonitor,
 )
-from agent_harness.ports.governance import ReviewItem
+from halo_agent_harness.ports.governance import ReviewItem
 
 _T0 = datetime(2026, 8, 8, 12, 0, 0, tzinfo=timezone.utc)
 

@@ -7,14 +7,14 @@ import json
 
 import pytest
 
-from agent_harness.adapters import (
+from halo_agent_harness.adapters import (
     PROVIDERS,
     AnthropicLlm,
     LlmError,
     OpenAICompatibleLlm,
     openai_compatible,
 )
-from agent_harness.ports.llm import Message, ToolDefinition
+from halo_agent_harness.ports.llm import Message, ToolDefinition
 
 
 class FakeTransport:

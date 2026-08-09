@@ -9,7 +9,7 @@ import pytest
 
 pytest.importorskip("jsonschema")  # the CLI validates against the schema
 
-from agent_harness.cli import main
+from halo_agent_harness.cli import main
 
 _EXAMPLES = Path(__file__).resolve().parents[3] / "docs" / "spec" / "examples"
 _ALL_EXAMPLES = sorted(str(p) for p in _EXAMPLES.glob("*.contract.json"))

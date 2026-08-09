@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from agent_harness import AgentInput, AuthorityLevel, DecisionAction, Harness
-from agent_harness.adapters import FileKillSwitch
+from halo_agent_harness import AgentInput, AuthorityLevel, DecisionAction, Harness
+from halo_agent_harness.adapters import FileKillSwitch
 from conftest import FakeAgent, static_decision
 
 

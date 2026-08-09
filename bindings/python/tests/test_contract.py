@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from agent_harness.contract import load_contract, load_schema, validate_contract
-from agent_harness.core.errors import ContractValidationError
+from halo_agent_harness.contract import load_contract, load_schema, validate_contract
+from halo_agent_harness.core.errors import ContractValidationError
 
 # Repo root: this file lives at <root>/bindings/python/tests/, so the canonical docs are three up.
 REPO = Path(__file__).resolve().parents[3]

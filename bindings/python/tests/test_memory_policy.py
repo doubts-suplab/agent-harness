@@ -6,7 +6,7 @@ import dataclasses
 
 import pytest
 
-from agent_harness.adapters import (
+from halo_agent_harness.adapters import (
     FileMemory,
     InMemoryMemory,
     PolicyRule,
