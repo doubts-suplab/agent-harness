@@ -193,6 +193,11 @@ Lowering the barrier for someone outside the Aether family to evaluate and adopt
   `python -m agent_harness`) validates against the schema + binding rule (spec §3.3, §10), with batch
   support and meaningful exit codes (0 valid / 1 invalid / 2 missing). Added two more worked contract
   examples (`observe-monitor`, `advisory-reviewer`). Tests: `tests/test_cli.py` (5).
+- [x] **More examples (Python + Java).** Beyond `quickstart`: `orchestration` (all four patterns),
+  `contract_validation` (load + validate + the binding rule rejecting a self-escalation), and
+  `failure_modes` (agent raises / unauthorized tool / low confidence / kill switch — all resolve to safe
+  defaults). Each Python example has a smoke test (`tests/test_examples.py`, 5) so they can't bit-rot; a
+  Java `OrchestrationExample` mirrors the orchestration walk-through with its own smoke test.
 
 ---
 
