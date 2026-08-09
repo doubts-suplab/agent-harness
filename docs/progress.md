@@ -159,6 +159,54 @@ adapters live behind the existing port Protocols and are opt-in.
   audit adapters (`InMemoryAudit`, `FileAudit`) accept a custom strategy. The default `redact` free
   function is preserved. Python (`adapters/redaction.py`) + Java (`adapters/RedactionStrategy.java`,
   `Redaction` now a thin facade). Tests: `tests/test_redaction.py` (5) + `RedactionStrategyTest` (4).
+- [x] **Production `LlmPort` providers (§7).** One flexible **OpenAI-compatible HTTP adapter**
+  (`OpenAICompatibleLlm`) plus a **preset registry** (`PROVIDERS`: OpenAI, Groq, Ollama, Gemini's
+  OpenAI-compat endpoint, Sarvam AI) — adding a compatible provider is config, not code
+  (`openai_compatible("groq")`). A **native `AnthropicLlm`** covers the Anthropic Messages API
+  (top-level system, `input_schema` tools, `text`/`tool_use` blocks). Default transport is an async
+  `httpx` client (the `llm` extra; no provider SDKs, lazily imported); keys come from env, and it is
+  **offline-tested via an injected transport**; streaming is deferred. Python (`adapters/llm_http.py`,
+  `adapters/llm_anthropic.py`). Tests:
+  `tests/test_llm_providers.py` (9). *(Python-only this cycle; Java native HTTP LLM adapters are a
+  follow-up — the Java binding keeps `StubLlm`.)*
+- [x] **OpenTelemetry `ObservabilityPort` exporter (§7.5, §4.2).** `OtelObservability` maps each
+  per-invocation metric to an OTel **span** (agent, action, confidence, duration, outcome, correlation
+  id) and to **metrics** (`agent_invocations_total` counter + `agent_invocation_duration_ms` histogram),
+  and mirrors harness counters — including `confidence_gate_bypass_total` — as OTel counters. It is an
+  **optional** adapter (the `otel` extra: `opentelemetry-sdk`), deliberately *not* imported by
+  `agent_harness.adapters`, so the SDK is only needed when you import it. Offline-tested with the OTel
+  SDK's in-memory span exporter + metric reader, including an end-to-end `Harness` wiring. Python-only
+  (`adapters/otel.py`); Java OTel would need a separate optional Maven module (deferred). Tests:
+  `tests/test_otel.py` (4).
+
+> **Increment 4 status:** all deliverables except the Prometheus/Grafana metrics dashboard are in
+> (that item is deferred). Suite after Increment 4: **Python 121**, **Java 80**.
+
+---
+
+## Increment 5 — Adoption: packaging, examples, standalone docs 🚧 (in progress)
+
+Lowering the barrier for someone outside the Aether family to evaluate and adopt HALO.
+
+- [x] **Standalone README + comparison table.** The README (and `docs/index.html` mirror) now leads with
+  *the problem* (agents that act need a governance layer teams otherwise hand-roll), a minimal
+  ecosystem-free example, and a **comparison table** vs LangChain/LangGraph, CrewAI, AutoGen, and a raw
+  SDK (framed as complementary — governance vs orchestration). The Aether ecosystem is pushed below the
+  fold.
+- [x] **CHANGELOG.md + versioning/stability policy.** Keep a Changelog format grouped by increment, with
+  an explicit `0.x` policy: the protocol may still change pre-1.0, but the safety invariants never weaken;
+  1.0 follows a frozen protocol + conformance suite.
+- [x] **AGPL-3.0 implications callout + `LICENSING.md`.** A plain-language "what AGPL means if you build
+  on HALO" guide (network/§13 copyleft, options, not-legal-advice disclaimer). License unchanged.
+- [x] **Agent Contract validation CLI.** `halo validate-contract <path.json>...` (console script +
+  `python -m agent_harness`) validates against the schema + binding rule (spec §3.3, §10), with batch
+  support and meaningful exit codes (0 valid / 1 invalid / 2 missing). Added two more worked contract
+  examples (`observe-monitor`, `advisory-reviewer`). Tests: `tests/test_cli.py` (5).
+- [x] **More examples (Python + Java).** Beyond `quickstart`: `orchestration` (all four patterns),
+  `contract_validation` (load + validate + the binding rule rejecting a self-escalation), and
+  `failure_modes` (agent raises / unauthorized tool / low confidence / kill switch — all resolve to safe
+  defaults). Each Python example has a smoke test (`tests/test_examples.py`, 5) so they can't bit-rot; a
+  Java `OrchestrationExample` mirrors the orchestration walk-through with its own smoke test.
 
 ---
 

@@ -66,7 +66,7 @@ adapters live behind the existing Protocol ports and are opt-in.
 | **OpenTelemetry** `ObservabilityPort` exporter (traces + metrics) | **M** | Correlation IDs already propagate; map per-invocation spans (agent, action, confidence, duration, outcome) + OTLP export. Optional dependency. |
 | **Durable `AuditPort`** adapter (append-only: JDBC / file / object store) | **M** | Mirror the append-only audit pattern already used across Aether (erasure/federation logs). PII-redacted. |
 | **Real `HumanReviewPort`** queue adapter + **SLA enforcement/monitoring** | **M** | SLAs are defined in code but not enforced; add a deadline + a sweep/monitor hook (the Aether Flow escalation model is a reference, not a dependency). |
-| **Production `LlmPort` providers** beyond the stub: one flexible **OpenAI-compatible HTTP adapter** + a preset registry (OpenAI, Groq, Ollama, Gemini's OpenAI-compat endpoint, Sarvam AI), plus a **native Anthropic** adapter (Messages API + `tool_use`). Adding a compatible provider is config, not code. | **M** | stdlib-only (no SDK deps), lazily imported, keys via env, offline-tested via an injected transport. Streaming deferred to a follow-up. |
+| **Production `LlmPort` providers** beyond the stub: one flexible **OpenAI-compatible HTTP adapter** + a preset registry (OpenAI, Groq, Ollama, Gemini's OpenAI-compat endpoint, Sarvam AI), plus a **native Anthropic** adapter (Messages API + `tool_use`). Adding a compatible provider is config, not code. | **M** | Async `httpx` (generic HTTP, the `llm` extra) — no provider SDKs; lazily imported, keys via env, offline-tested via an injected transport. Streaming deferred to a follow-up. |
 | **Complete `MemoryPort` + `PolicyPort`** reference adapters (currently underdeveloped) | **M** | Bring them to parity with the other ports; add in-memory + one durable reference each. |
 | **Richer redaction** (beyond basic patterns) + structured logging fields | **M** | Pluggable redaction strategy; document the default patterns and their limits. |
 | **Cross-process kill-switch propagation** (`KillSwitchPort` durable/shared adapter) | **M–L** | Today the kill switch is in-process; add a shared-signal adapter (file/DB/Redis) so a trip propagates. Distributed correctness is the hard part. |
@@ -139,6 +139,7 @@ against the spec.
 | **CONTRIBUTING.md, issue/PR templates, public roadmap** (this file) | **S** | Community on-ramp; 1★/0 forks today. |
 | **Non-Aether usage examples** + comparison table | **S** | Positioning for outsiders. |
 | **Dual-naming consistency** (HALO ⇄ `agent-harness`) everywhere | **S** | ADR-0010 already sets the convention; audit README/docs/package metadata for consistency. |
+| **(Proposed) Rebrand distribution names to `halo-agent-harness`** — PyPI dist `halo-agent-harness`, Maven `com.suplab.agentharness:halo-agent-harness` | **M** | Future improvement; **supersedes/amends ADR-0010** (needs a new ADR). Prefer keeping the *import* surface stable — Python import package `agent_harness` and Java package `com.agentharness.*` can stay while only the published *artifact* coordinates change (distribution name ≠ import name), so consumers (apex-sdlc, aether-grid) don't break. Decide all-in package rename vs. artifact-only before doing it. |
 
 ---
 

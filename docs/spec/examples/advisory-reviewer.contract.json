@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0",
+  "identity": {
+    "agentName": "advisory-reviewer",
+    "agentClass": "AdvisoryReviewerAgent",
+    "capabilityEnum": "ADVISORY",
+    "ownerService": "example-consumer",
+    "version": "1.0.0"
+  },
+  "purpose": "A SUGGEST-authority reviewer that proposes improvements but cannot enforce them. It may ALLOW, SUGGEST, or DEFER — never ALERT or BLOCK — a worked example of an advisory contract whose decisions never auto-enforce.",
+  "authorityLevel": "SUGGEST",
+  "capabilities": ["ALLOW", "SUGGEST", "DEFER"],
+  "confidenceGate": {
+    "threshold": 0.8,
+    "escalationPath": "advisory-human-review-queue"
+  },
+  "toolAccess": [
+    { "tool": "LlmClient", "permission": "Invoke", "purpose": "Reason over the artifact under review", "sideEffect": "external" }
+  ],
+  "inputContract": {
+    "tenantScoped": true,
+    "requiredContextKeys": ["artifact"]
+  },
+  "outputContract": {
+    "emitsDecision": true,
+    "rationaleAlwaysPresent": true
+  },
+  "fastPathConditions": [
+    { "when": "Artifact is empty", "action": "DEFER", "confidence": 0.5 }
+  ],
+  "failureBehaviour": [
+    { "failure": "LLM unavailable", "action": "ALLOW", "confidence": 0.5, "autoEnforced": false }
+  ],
+  "testingRequirements": [
+    "fast-path: empty artifact -> DEFER",
+    "LLM-path: proposes SUGGEST with rationale",
+    "capability-declaration: never emits ALERT/BLOCK (out of authority)",
+    "SUGGEST decisions never auto-enforce regardless of confidence"
+  ],
+  "governance": {
+    "signoff": [
+      { "role": "Agent Engineer" }
+    ]
+  }
+}
