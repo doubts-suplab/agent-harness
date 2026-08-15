@@ -445,13 +445,15 @@
         <code>bindings/python/</code> — a framework-free core (envelope, gate,
         registry, harness), Supervisor+Workers, port Protocols with in-memory
         adapters, and a contract loader.
-        <strong>Increment 2</strong> ships two real bindings/consumers: a
-        <strong>Java 21 binding</strong> (<code>java/</code>,
-        <code>com.suplab.agentharness</code>) with a grid migration adapter, and
+        <strong>Increment 2</strong> ships the real bindings and consumers: a
+        <strong>Java 21 binding</strong> (<code>bindings/java/</code>,
+        <code>com.suplab.agentharness</code>) with a grid migration adapter;
         <strong>apex-sdlc</strong> running <strong>all seven</strong> of its
-        SDLC phase agents on the harness, with a runnable reference journey that
-        walks one project through every phase offline (the harness, not the
-        agents, decides enforcement).
+        SDLC phase agents on the harness (a runnable reference journey walks one
+        project through every phase offline); and <strong>aether-grid</strong>
+        routing <strong>all seven</strong> of its governance agents through the
+        harness with a shared default-deny tool registry — the harness, not the
+        agents, decides enforcement.
         <strong>Increment 3</strong> completes the protocol in both languages:
         all four orchestration patterns (Pipeline, Fan-out, Debate/Consensus,
         and Supervisor+Workers with a governed planning turn) plus

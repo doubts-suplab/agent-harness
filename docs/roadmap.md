@@ -108,11 +108,12 @@ Prove the safety guarantees under stress, and finish the in-flight consumer work
 | **Cross-language interop tests** beyond `LegacyAgentAdapter` | **M** | Same contract → same decision in Python and Java. |
 | **Mutation testing** (mutmut / PIT) targeting the gate invariant | **M** | Stronger assurance that "bypass counter == 0" is actually enforced, not just asserted. |
 | **CI upgrades**: coverage reporting, Python/Java version matrix, conformance badge | **S–M** | Extends the existing Python+Java CI. |
-| **Finish the remaining 6 aether-grid agent migrations** + document the migration path | **M** | Cross-repo (aether-grid); closes Increment 2's incremental-migration note. |
-| **Close the eeik-bootstrap divergent-manifest-schema item** | **M** | Cross-repo (eeik-bootstrap); the last open Increment-2 checkbox. |
+| **Finish the remaining 6 aether-grid agent migrations** + document the migration path ✅ Done | **M** | Cross-repo (aether-grid): all 7 grid agents route through the harness (`GovernanceAgent` directly, the other 6 via `HarnessRouting.gate`); shared `ToolRegistry` wired + conformance test. Closes Increment 2's incremental-migration note. Follow-up (grid repo): honest per-agent authority ceilings. |
+| **Close the eeik-bootstrap divergent-manifest-schema item** ✅ Done | **M** | Cross-repo (eeik-bootstrap): single canonical `manifest.schema.json`, extended for the local-first / HALO-on-Ollama posture (eeik ADR-013); the Aether repos now carry validating canonical manifests. |
 
 **Exit:** safety invariants are proven under concurrency/partial failure; all grid agents run on the
-harness; the eeik manifest reconciliation is closed.
+harness ✅; the eeik manifest reconciliation is closed ✅. (The remaining Increment-6 items are the
+test-hardening rows above.)
 
 ---
 
