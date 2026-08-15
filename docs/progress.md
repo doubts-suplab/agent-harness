@@ -3,8 +3,9 @@
 Tracks increment-by-increment delivery. Newest first. For what's **planned next** (Increments 3–7,
 with feasibility and priority), see [`roadmap.md`](roadmap.md).
 
-> **Where things stand:** Increments 0–1 complete; Increment 2 (consumers) nearly complete with one
-> open item below. A structured review produced a prioritized plan now tracked in the roadmap:
+> **Where things stand:** Increments 0–2 complete (Increment 2 consumers: apex-sdlc, aether-grid — all
+> 7 grid agents on the harness — eeik-bootstrap; and the manifest reconciliation is closed). A
+> structured review produced a prioritized plan now tracked in the roadmap:
 > (P1) finish orchestration patterns + side-effect gating, (P2) real adapters + observability,
 > (P3) packaging + examples + standalone docs, (P4) concurrency/failure tests + finish consumer
 > migrations, (P5) cross-language binding + a formal conformance suite. Nothing in Increments 3–7 has
@@ -37,7 +38,7 @@ Python 3.11+ framework-free core, `bindings/python/src/halo_agent_harness/` (see
 - [x] `pytest` conformance suite mapping 1:1 to spec §9 (`tests/test_conformance.py`) + contract + framework-free tests
 - [x] Runnable `examples/quickstart.py`
 
-## Increment 2 — Consumers 🚧 (in progress)
+## Increment 2 — Consumers ✅ (complete)
 
 - [x] **apex-sdlc consumes the harness — now all seven phase agents.** apex's phase agents run on the harness
   instead of a hand-rolled loop: `app/agents/` bridge (context mapping, structlog port adapters, `PhaseAgent`
@@ -59,8 +60,13 @@ Python 3.11+ framework-free core, `bindings/python/src/halo_agent_harness/` (see
 - [x] **aether-grid consumes the Java binding.** `aether-agents` depends on `com.suplab.agentharness:halo-agent-harness`;
   the confidence gate is centralized in `HarnessConfidenceGate` (delegating to the harness `ConfidenceGate`),
   deleting the 3 duplicated `0.8` checks (`AgentOutput`, `GovernanceAgent`, `TemporalPredictionAgent`).
-  `GovernanceAgent` routes through `Harness.invoke`; BLOCK now auto-enforces at ≥ 0.95. 39 aether-agents tests
-  green. Grid docs synced. (Remaining 6 agents migrate incrementally; tool registry is net-new for grid.)
+  `GovernanceAgent` routes through `Harness.invoke`; BLOCK now auto-enforces at ≥ 0.95. Grid docs synced.
+  **All 7 grid agents now route through the harness** — `GovernanceAgent` directly, the other 6
+  (`RetryAgent`, `HallucinationDetectorAgent`, `TemporalPredictionAgent`, `ReflectionAgent`,
+  `SelfImprovingAgent`, `AetherCoreBridgeAgent`) via `HarnessRouting.gate(...)` — and the shared
+  `ToolRegistry` (default-deny) is wired with a per-agent grant + a passing conformance test. The
+  incremental-migration note is therefore closed; per-agent authority ceilings are tracked as a
+  refinement in the grid repo.
 - [x] **eeik-bootstrap consumes the Python runtime (v1.4).** EEIK's generators run on the harness via
   `eeik/generation.py` — a fourth consumer. Generation is modelled as a `SUGGEST`-authority
   agent, so the gate (G-5) guarantees it never auto-enforces: drafts are audited and routed to human
@@ -70,9 +76,12 @@ Python 3.11+ framework-free core, `bindings/python/src/halo_agent_harness/` (see
   own `halo_agent_harness.contract.validate_contract` (schema + §3.3 binding rule). Closes the chain: EEIK
   generates against this repo's Agent Contract schema → HALO runs it. (This schema formalizes the AIEL
   template; AIEL is upstream of HALO, with no dependency on EEIK.) See eeik `ADR-009`.
-- [ ] Reconcile eeik-bootstrap's three divergent manifest schemas before wide pack rollout
-  — carried into [roadmap Increment 6](roadmap.md#increment-6--test-hardening--consumer-migration-p4)
-  alongside finishing the remaining aether-grid agent migrations.
+- [x] **eeik manifest schema reconciled.** eeik-bootstrap already collapsed its three divergent copies
+  into one canonical `manifest.schema.json`; it now also expresses the local-first / HALO-on-Ollama
+  posture (eeik ADR-013), and the Aether repos (core, grid, memory, vault, flow) carry validating
+  canonical `project-manifest.yaml` files.
+- [x] **aether-grid agent migration finished.** All 7 grid agents route through the harness (see above);
+  the Increment-2 incremental note is closed.
 
 ---
 

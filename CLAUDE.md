@@ -26,8 +26,9 @@ It does **not** own prompts, business logic, memory content, or product UX.
 completeness)** complete. Ships the normative [harness protocol spec](docs/spec/harness-protocol.md), the
 [agent-contract JSON Schema](docs/spec/agent-contract.schema.json), the [decision records](docs/decisions/),
 and two peer bindings under `bindings/` — Python (`bindings/python/`) and Java (`bindings/java/`) — with
-all four orchestration patterns (§6) and side-effect gating (§5.3, T-5). **Increment 2 in progress:**
-apex-sdlc consumes the harness (first real consumer), plus aether-grid. Build/test: Python —
+all four orchestration patterns (§6) and side-effect gating (§5.3, T-5). **Increment 2 complete:**
+consumed by apex-sdlc (first real consumer), aether-grid (all 7 agents on the harness), and
+eeik-bootstrap; the eeik manifest reconciliation is closed. Build/test: Python —
 `cd bindings/python && python3 -m venv .venv && pip install -e ".[test]" && pytest` (74 tests, 3.11/3.12);
 Java — `cd bindings/java && mvn test` (54 tests).
 

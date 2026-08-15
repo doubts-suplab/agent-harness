@@ -133,7 +133,7 @@ bindings/java/    Java binding (src/, pom.xml)
 
 Increments 0–3 are in; Increment 4 (production adapters) is largely delivered:
 
-- **0 — Specification** · **1 — Python reference** · **2 — Java binding + apex-sdlc consumer.**
+- **0 — Specification** · **1 — Python reference** · **2 — Java binding + consumers (apex-sdlc, aether-grid — all 7 agents on the harness, eeik-bootstrap).**
 - **3 — Protocol completeness** (both languages): all four orchestration patterns + side-effect gating (T-5, §5.3).
 - **4 — Production adapters** (in progress): human-review SLA monitoring, durable file audit, cross-process
   kill switch, Memory/Policy adapters, pluggable redaction, OpenTelemetry exporter, and OpenAI-compatible +
